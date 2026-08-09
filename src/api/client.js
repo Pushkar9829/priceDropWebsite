@@ -1,4 +1,5 @@
-const API_BASE = import.meta.env.VITE_API_BASE || '/api/v1';
+const API_BASE =
+  import.meta.env.VITE_API_BASE || 'https://pricedropbackend.onrender.com/api/v1';
 const TOKEN_KEY = 'pc_web_token';
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
