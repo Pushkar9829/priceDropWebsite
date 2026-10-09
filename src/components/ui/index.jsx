@@ -29,7 +29,8 @@ export const Button = forwardRef(function Button(
     <Comp
       ref={ref}
       className={cx(
-        'inline-flex shrink-0 items-center justify-center font-semibold whitespace-nowrap transition disabled:pointer-events-none disabled:opacity-50',
+        'btn inline-flex shrink-0 items-center justify-center font-semibold whitespace-nowrap transition disabled:pointer-events-none disabled:opacity-50',
+        `btn-${variant}`,
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
         className
@@ -301,7 +302,7 @@ export function ProductThumb({ src, alt = '', className, fallback, compact = fal
   return (
     <div className={cx('relative grid place-items-center overflow-hidden', light ? 'bg-[#ffffff]' : 'bg-white', className)}>
       {showImage ? (
-        <img src={src} alt={alt} loading="lazy" className="absolute inset-0 size-full object-contain p-3" onError={() => setFailed(true)} />
+        <img src={src} alt={alt} loading="lazy" className="dn-zoom absolute inset-0 size-full object-contain p-3" onError={() => setFailed(true)} />
       ) : (
         // Missing/broken image: a deliberate placeholder instead of a blank tile
         <div

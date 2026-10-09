@@ -26,15 +26,13 @@ export default function BrandCard({ brand }) {
   return (
     <Link
       to={`/brands/${encodeURIComponent(brand.name)}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-slate-200/30 bg-white/60 transition hover:-translate-y-0.5 hover:border-brand-300/60 hover:bg-white"
+      className="group dn-brand-card"
     >
       <div className="relative grid aspect-[4/5] place-items-center">
         {brand.maxDiscount > 0 ? (
-          <span className="absolute top-3 left-3 rounded-md bg-brand-500 px-1.5 py-0.5 text-[11px] font-bold text-[#0f1a14]">
-            Up to {brand.maxDiscount}% OFF
-          </span>
+          <span className="dn-pill absolute top-3 left-3 px-2 py-0.5 text-xs">Up to {brand.maxDiscount}% OFF</span>
         ) : null}
-        <BrandLogo name={brand.name} className="transition group-hover:scale-105" />
+        <BrandLogo name={brand.name} className="shadow-sm ring-1 ring-black/5 transition-transform duration-300 group-hover:scale-105" />
       </div>
       <div className="px-4 pb-4">
         <p className="truncate font-semibold text-slate-900">{brand.name}</p>

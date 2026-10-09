@@ -79,7 +79,7 @@ export default function Notifications() {
               const unreadItem = n.status !== 'READ';
               const pid = n.meta?.productId;
               const Body = (
-                <div className={cx('flex gap-3 px-5 py-4 transition hover:bg-slate-50', unreadItem && 'bg-brand-50/40')}>
+                <div className={cx('dn-row flex gap-3 px-5 py-4', unreadItem && 'bg-brand-50/40')}>
                   <span className={cx('mt-1.5 size-2 shrink-0 rounded-full', unreadItem ? 'bg-brand-500' : 'bg-transparent')} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-3">

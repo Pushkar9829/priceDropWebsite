@@ -3,7 +3,7 @@ import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 import { formatInr } from '../../lib/format';
 
 // Tuned for the dark shopper theme
-const COLORS = ['#2fc97f', '#60a5fa', '#f5b041', '#f472b6', '#a78bfa', '#22d3ee'];
+const COLORS = ['#2fda76', '#60a5fa', '#f5b041', '#f472b6', '#a78bfa', '#22d3ee'];
 
 /**
  * Step-style price history: one line per store, carrying each store's last known price forward.

@@ -65,35 +65,42 @@
  */
 .theme-dark {
   color-scheme: dark;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Nunito Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
 
-  --color-white: #232526;
+  /* droppingnow tokens (hsl values from the source, converted) */
+  --dn-primary: #2fda76;
+  --dn-gradient: linear-gradient(135deg, #22bf63, #49df87);
+  --dn-card: #252627;
+  --dn-border: #3e3f42;
+  --dn-secondary: #323336;
+
+  --color-white: #252627;
   --color-slate-50: #1d1f20;
-  --color-slate-100: #2a2c2e;
-  --color-slate-200: #35373b;
+  --color-slate-100: #2b2c2e;
+  --color-slate-200: #3e3f42;
   --color-slate-300: #46484c;
   --color-slate-400: #7c7f84;
-  --color-slate-500: #9b9da2;
+  --color-slate-500: #a4a7ad;
   --color-slate-600: #b8babe;
   --color-slate-700: #d2d3d6;
   --color-slate-800: #e6e7e9;
   --color-slate-900: #fafafa;
   --color-slate-950: #ffffff;
 
-  --color-brand-50: #16291f;
-  --color-brand-100: #1b3628;
+  --color-brand-50: #163b26;
+  --color-brand-100: #1b4a2f;
   --color-brand-200: #21503a;
   --color-brand-300: #2a7a52;
-  --color-brand-400: #29b06d;
-  --color-brand-500: #2fc97f;
-  --color-brand-600: #2fc97f;
-  --color-brand-700: #5ad99b;
-  --color-brand-800: #8be6b9;
+  --color-brand-400: #22bf63;
+  --color-brand-500: #2fda76;
+  --color-brand-600: #2fda76;
+  --color-brand-700: #2fda76;
+  --color-brand-800: #49df87;
 
-  --color-emerald-50: #16291f;
+  --color-emerald-50: #163b26;
   --color-emerald-200: #21503a;
-  --color-emerald-500: #2fc97f;
-  --color-emerald-600: #2fc97f;
+  --color-emerald-500: #2fda76;
+  --color-emerald-600: #2fda76;
   --color-emerald-700: #5ad99b;
   --color-rose-50: #3a1d22;
   --color-rose-200: #5c2a32;
@@ -108,8 +115,8 @@
   --color-sky-200: #1f4560;
   --color-sky-700: #7cc4f0;
 
-  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.02) inset;
-  --shadow-lift: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  --shadow-card: 0 1px 2px hsl(0 0% 0% / 0.4);
+  --shadow-lift: 0 4px 12px hsl(0 0% 0% / 0.45);
 
   background-color: #181a1b;
   color: var(--color-slate-900);
@@ -120,8 +127,186 @@ body:has(.theme-dark) {
   background-color: #181a1b;
 }
 .theme-dark .card {
+  background-color: var(--dn-card);
+  border-color: rgb(62 63 66 / 0.5);
+  border-radius: 0.75rem;
+  box-shadow: none;
+}
+
+/* ── droppingnow interactions (shopper only) ─────────────────────────────
+ * Unlayered on purpose so these win over the shared Button variant utilities
+ * inside .theme-dark, while the admin console keeps its own look. */
+.theme-dark .btn {
+  border-radius: 9999px;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.theme-dark .btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.theme-dark .btn-primary,
+.theme-dark .btn-success {
+  background: var(--dn-gradient);
+  color: #ffffff;
+  box-shadow: 0 10px 15px -3px rgb(47 218 118 / 0.3), 0 4px 6px -4px rgb(47 218 118 / 0.3);
+  transition-duration: 300ms;
+}
+.theme-dark .btn-secondary {
+  background-color: rgb(50 51 54 / 0.6);
+  border-color: transparent;
+  color: rgb(250 250 250 / 0.85);
+  box-shadow: none;
+}
+.theme-dark .btn-ghost {
+  color: rgb(250 250 250 / 0.6);
+}
+.theme-dark .btn-soft {
+  background-color: #163b26;
+  color: var(--dn-primary);
+}
+@media (hover: hover) {
+  .theme-dark .btn-primary:hover:not(:disabled),
+  .theme-dark .btn-success:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 10px 15px -3px rgb(47 218 118 / 0.5), 0 4px 6px -4px rgb(47 218 118 / 0.5);
+  }
+  .theme-dark .btn-secondary:hover:not(:disabled) {
+    background-color: var(--dn-secondary);
+    color: #fafafa;
+  }
+  .theme-dark .btn-ghost:hover:not(:disabled) {
+    background-color: rgb(250 250 250 / 0.05);
+    color: #fafafa;
+  }
+  .theme-dark .btn-soft:hover:not(:disabled) {
+    background-color: rgb(47 218 118 / 0.2);
+  }
+}
+
+/* Product / deal tile: bordered card, lifts 2px with a shadow (150ms) */
+.dn-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(62 63 66 / 0.4);
+  background-color: #252627;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Brand tile: softer card, green glow on hover (300ms) */
+.dn-brand-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(62 63 66 / 0.3);
   background-color: rgb(37 38 39 / 0.6);
-  border-color: rgb(62 63 66 / 0.35);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Category / nav chip */
+.dn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  padding: 0.375rem 0.75rem;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  color: rgb(250 250 250 / 0.6);
+  transition: color 150ms, background-color 150ms;
+}
+.dn-chip.active {
+  background-color: rgb(250 250 250 / 0.1);
+  color: #fafafa;
+}
+/* Discount / NEW pills */
+.dn-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background-color: #163b26;
+  color: #2fda76;
+  font-weight: 700;
+}
+.dn-pill-new {
+  background-color: #300845;
+  color: #be5eed;
+}
+/* Round floating icon button */
+.dn-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(62 63 66 / 0.3);
+  background-color: rgb(24 26 27 / 0.9);
+  backdrop-filter: blur(4px);
+  transition: color 150ms, background-color 150ms;
+}
+.dn-link {
+  transition: color 150ms;
+}
+.dn-row {
+  transition: background-color 150ms;
+}
+/* Image zoom inside a hovered tile (500ms) */
+.dn-zoom {
+  transition: transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (hover: hover) {
+  .dn-card:hover {
+    transform: translateY(-0.125rem);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+  .dn-brand-card:hover {
+    transform: translateY(-0.125rem);
+    border-color: rgb(62 63 66 / 0.6);
+    box-shadow: 0 20px 50px -20px rgba(34, 197, 94, 0.35);
+  }
+  .dn-chip:not(.active):hover {
+    background-color: rgb(250 250 250 / 0.05);
+    color: #fafafa;
+  }
+  .dn-icon-btn:hover {
+    background-color: #2fda76;
+    color: #ffffff;
+  }
+  .dn-link:hover {
+    color: #2fda76;
+  }
+  .dn-row:hover {
+    background-color: rgb(250 250 250 / 0.05);
+  }
+  .group:hover .dn-zoom {
+    transform: scale(1.05);
+  }
+}
+/* Route enter: 0.4s fade + 8px rise */
+@keyframes dn-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.dn-page {
+  animation: dn-fade-in 0.4s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dn-page,
+  .dn-card,
+  .dn-brand-card,
+  .dn-zoom,
+  .theme-dark .btn {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }
 .theme-dark .skeleton {
   background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.05), transparent);
@@ -129,13 +314,13 @@ body:has(.theme-dark) {
 /* Green scroll indicator for horizontal rails (category strip) */
 .rail-green {
   scrollbar-width: thin;
-  scrollbar-color: #2fc97f transparent;
+  scrollbar-color: rgb(47 218 118 / 0.52) transparent;
 }
 .rail-green::-webkit-scrollbar {
   height: 4px;
 }
 .rail-green::-webkit-scrollbar-thumb {
-  background: #2a7a52;
+  background: rgb(47 218 118 / 0.52);
   border-radius: 9999px;
 }
 

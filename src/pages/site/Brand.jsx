@@ -44,7 +44,7 @@ export default function Brand() {
         type="button"
         // 'default' key = first page in this tab (arrived from outside) → go home instead of leaving the site
         onClick={() => (location.key !== 'default' ? navigate(-1) : navigate('/'))}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900"
+        className="dn-link inline-flex items-center gap-1.5 text-sm font-medium text-slate-500"
       >
         <ArrowLeft className="size-4" /> Back
       </button>

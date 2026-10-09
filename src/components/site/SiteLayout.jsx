@@ -24,13 +24,13 @@ import SearchBox from './SearchBox';
 export function Logo({ className }) {
   return (
     <Link to="/" className={cx('inline-flex items-center gap-2 text-lg font-bold tracking-tight', className)} aria-label="PriceCompare home">
-      <span className="grid size-8 place-items-center rounded-full bg-[#2fc97f] text-[#0f1a14]">
+      <span className="grid size-8 place-items-center rounded-full bg-[#2fda76] text-[#0f1a14]">
         <svg viewBox="0 0 32 32" className="size-4.5" aria-hidden>
           <path d="M6 11l7 7 4-4 9 9" stroke="currentColor" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
       <span className="text-slate-900">
-        price<span className="text-[#2fc97f]">compare</span>
+        price<span className="text-[#2fda76]">compare</span>
       </span>
     </Link>
   );
@@ -150,7 +150,7 @@ export default function SiteLayout() {
   }, [isAuthenticated, location.pathname]);
 
   const isHome = location.pathname === '/';
-  const iconBtn = 'relative grid size-10 place-items-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-slate-900';
+  const iconBtn = 'relative grid size-10 place-items-center rounded-full text-[#fafafa]/60 transition-colors hover:bg-[#fafafa]/5 hover:text-[#fafafa]';
 
   return (
     <div className="theme-dark flex min-h-screen flex-col">
@@ -165,10 +165,7 @@ export default function SiteLayout() {
                 <NavLink
                   key={to}
                   to={to}
-                  className={cx(
-                    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition',
-                    active ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-900'
-                  )}
+                  className={() => cx('dn-chip', active && 'active')}
                 >
                   <Icon className="size-3.5" />
                   {label}
@@ -230,7 +227,7 @@ export default function SiteLayout() {
           <div className="border-t border-white/5 md:hidden">
             <nav className="container-page flex flex-col gap-1 py-3" aria-label="Mobile">
               {NAV.map(({ to, label, icon: Icon }) => (
-                <NavLink key={to} to={to} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                <NavLink key={to} to={to} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 dn-row">
                   <Icon className="size-4" /> {label}
                 </NavLink>
               ))}
@@ -238,15 +235,15 @@ export default function SiteLayout() {
               {isAuthenticated ? (
                 <>
                   {USER_NAV.map(({ to, label, icon: Icon }) => (
-                    <NavLink key={to} to={to} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                    <NavLink key={to} to={to} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 dn-row">
                       <Icon className="size-4" /> {label}
                     </NavLink>
                   ))}
-                  <NavLink to="/account" className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  <NavLink to="/account" className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 dn-row">
                     <User className="size-4" /> Account
                   </NavLink>
                   {isAdmin ? (
-                    <NavLink to="/admin" className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                    <NavLink to="/admin" className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 dn-row">
                       <LayoutDashboard className="size-4" /> Admin console
                     </NavLink>
                   ) : null}
@@ -276,7 +273,9 @@ export default function SiteLayout() {
       </header>
 
       <main className="flex-1">
-        <Outlet />
+        <div key={location.pathname} className="dn-page">
+          <Outlet />
+        </div>
       </main>
 
       <footer className="mt-20 border-t border-white/5">
@@ -290,9 +289,9 @@ export default function SiteLayout() {
           <div>
             <p className="text-sm font-semibold">Explore</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-500">
-              <li><Link to="/deals" className="hover:text-slate-900">Price drops</Link></li>
-              <li><Link to="/search?sort=newest" className="hover:text-slate-900">New arrivals</Link></li>
-              <li><Link to="/search" className="hover:text-slate-900">All products</Link></li>
+              <li><Link to="/deals" className="dn-link">Price drops</Link></li>
+              <li><Link to="/search?sort=newest" className="dn-link">New arrivals</Link></li>
+              <li><Link to="/search" className="dn-link">All products</Link></li>
             </ul>
           </div>
           <div>
@@ -300,7 +299,7 @@ export default function SiteLayout() {
             <ul className="mt-3 space-y-2 text-sm text-slate-500">
               {['Electronics', 'Fashion', 'Beauty', 'Home'].map((c) => (
                 <li key={c}>
-                  <Link to={`/search?category=${encodeURIComponent(c)}`} className="hover:text-slate-900">{c}</Link>
+                  <Link to={`/search?category=${encodeURIComponent(c)}`} className="dn-link">{c}</Link>
                 </li>
               ))}
             </ul>
@@ -308,9 +307,9 @@ export default function SiteLayout() {
           <div>
             <p className="text-sm font-semibold">Your account</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-500">
-              <li><Link to="/watchlist" className="hover:text-slate-900">Watchlist</Link></li>
-              <li><Link to="/alerts" className="hover:text-slate-900">Price alerts</Link></li>
-              <li><Link to="/account" className="hover:text-slate-900">Settings</Link></li>
+              <li><Link to="/watchlist" className="dn-link">Watchlist</Link></li>
+              <li><Link to="/alerts" className="dn-link">Price alerts</Link></li>
+              <li><Link to="/account" className="dn-link">Settings</Link></li>
             </ul>
           </div>
         </div>

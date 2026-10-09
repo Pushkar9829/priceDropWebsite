@@ -2,38 +2,41 @@ import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowDownRight,
+  ArrowLeft,
   ArrowUpRight,
   BellRing,
-  ChevronRight,
   Clock,
   ExternalLink,
   Heart,
   RefreshCw,
   Star,
+  Store,
   Trophy,
 } from 'lucide-react';
 import { Badge, Button, EmptyState, ErrorBanner, ProductThumb, Skeleton, StatusBadge, StoreLogo, cx } from '../../components/ui';
 import { alertApi, notifyInboxChanged, productApi, watchlistApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
-import ProductCard from '../../components/site/ProductCard';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { discountPct, formatDate, formatInr, timeAgo } from '../../lib/format';
+import { discountPct, formatDate, formatInr, productImage, timeAgo } from '../../lib/format';
 
 const PriceChart = lazy(() => import('../../components/site/PriceChart'));
 const RANGES = [30, 90, 180, 365];
 
-function Gallery({ images = [], title, brand }) {
+function Gallery({ images = [], title, brand, offPct, isNew }) {
   const [active, setActive] = useState(0);
   useEffect(() => setActive(0), [images]);
   return (
-    <div>
-      <ProductThumb
-        src={images[active]}
-        alt={title}
-        fallback={brand}
-        className="aspect-square rounded-2xl border border-slate-200/80 shadow-card [&_img]:p-8"
-      />
+    <div className="relative w-full min-w-0">
+      <div className="relative aspect-square overflow-hidden rounded-3xl border border-white/5 bg-[#252627]">
+        <ProductThumb src={images[active]} alt={title} fallback={brand} className="size-full bg-transparent [&_img]:p-0" />
+        <div className="absolute top-4 left-4 flex flex-col items-start gap-2">
+          {offPct ? (
+            <span className="rounded-full bg-[#163b26] px-3 py-1.5 text-sm font-bold text-[#2fda76]">{offPct}% OFF</span>
+          ) : null}
+          {isNew ? <span className="rounded-full bg-[#300845] px-3 py-1.5 text-sm font-bold text-[#be5eed]">NEW</span> : null}
+        </div>
+      </div>
       {images.length > 1 ? (
         <div className="scrollbar-none mt-3 flex gap-2 overflow-x-auto">
           {images.slice(0, 8).map((src, i) => (
@@ -41,9 +44,10 @@ function Gallery({ images = [], title, brand }) {
               key={src}
               type="button"
               onClick={() => setActive(i)}
+              aria-label={`Image ${i + 1}`}
               className={cx(
-                'size-16 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition',
-                i === active ? 'border-brand-500' : 'border-slate-200 hover:border-slate-300'
+                'size-16 shrink-0 overflow-hidden rounded-xl border-2 bg-[#252627] p-1 transition',
+                i === active ? 'border-[#2fda76]' : 'border-white/10 hover:border-white/25'
               )}
             >
               <img src={src} alt="" className="size-full object-contain" loading="lazy" />
@@ -52,6 +56,29 @@ function Gallery({ images = [], title, brand }) {
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** "More from {brand}" tile: square image, % OFF pill, brand label, title, price. */
+function MiniProductCard({ product }) {
+  const pct = product.discountPercent;
+  return (
+    <Link to={`/products/${product.id}`} className="group block">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-white/[0.04]">
+        <ProductThumb
+          src={productImage(product.images)}
+          alt={product.title}
+          fallback={product.brand}
+          className="size-full bg-transparent transition-transform duration-500 group-hover:scale-105 [&_img]:p-2"
+        />
+        {pct ? (
+          <span className="absolute top-2.5 left-2.5 rounded-full bg-[#163b26] px-2.5 py-0.5 text-xs font-bold text-[#2fda76]">{pct}% OFF</span>
+        ) : null}
+      </div>
+      {product.brand ? <p className="mt-3 text-xs font-bold tracking-wider text-[#2fda76] uppercase">{product.brand}</p> : null}
+      <p className="mt-1 line-clamp-2 text-sm leading-snug font-medium text-slate-900 group-hover:text-[#2fda76]">{product.title}</p>
+      <p className="mt-1.5 text-base font-bold">{formatInr(product.lowestPrice)}</p>
+    </Link>
   );
 }
 
@@ -443,97 +470,136 @@ export default function Product() {
 
   return (
     <div className="container-page py-8">
-      <nav className="mb-6 flex flex-wrap items-center gap-1 text-sm text-slate-500">
-        <Link to="/" className="hover:text-slate-900">Home</Link>
-        <ChevronRight className="size-4" />
-        {product.category ? (
+      <nav className="flex min-w-0 items-center gap-2 text-sm text-slate-500" aria-label="Breadcrumb">
+        <Link to="/" className="dn-link shrink-0">Home</Link>
+        <span>/</span>
+        {product.brand ? (
           <>
-            <Link to={`/search?category=${encodeURIComponent(product.category)}`} className="hover:text-slate-900">
-              {product.category}
-            </Link>
-            <ChevronRight className="size-4" />
+            <Link to={`/brands/${encodeURIComponent(product.brand)}`} className="dn-link shrink-0">{product.brand}</Link>
+            <span>/</span>
           </>
         ) : null}
-        <span className="max-w-[16rem] truncate text-slate-700">{product.title}</span>
+        <span className="truncate text-slate-800">{product.title}</span>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-        <Gallery images={product.images || []} title={product.title} brand={product.brand} />
+      <button
+        type="button"
+        onClick={() => (location.key !== 'default' ? navigate(-1) : navigate('/'))}
+        className="dn-link mt-6 inline-flex items-center gap-2 text-base text-slate-500"
+      >
+        <ArrowLeft className="size-4" /> Back
+      </button>
 
-        <div className="min-w-0">
+      <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
+        <Gallery
+          images={product.images || []}
+          title={product.title}
+          brand={product.brand}
+          offPct={bestMrp ? discountPct(bestMrp, summary?.lowestPrice) : null}
+          isNew={Boolean(product.createdAt) && Date.now() - new Date(product.createdAt) < 7 * 24 * 3600 * 1000}
+        />
+
+        <div className="flex w-full min-w-0 flex-col">
           {product.brand ? (
-            <Link to={`/brands/${encodeURIComponent(product.brand)}`} className="text-xs font-semibold tracking-wider text-brand-600 uppercase hover:underline">
+            <Link to={`/brands/${encodeURIComponent(product.brand)}`} className="mb-2 text-sm font-bold tracking-wider text-[#2fda76] uppercase hover:underline">
               {product.brand}
             </Link>
           ) : null}
-          <h1 className="mt-2 text-2xl leading-tight font-bold tracking-tight sm:text-3xl">{product.title}</h1>
+          <h1 className="mb-6 text-2xl leading-tight font-bold sm:text-3xl">{product.title}</h1>
 
-          <div className="mt-6 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card">
-            {comparison.loading ? (
-              <Skeleton className="h-16 w-full" />
-            ) : summary?.lowestPrice ? (
-              <>
-                <p className="text-sm text-slate-500">Lowest price {best?.store?.name ? <>at <span className="font-semibold text-slate-700">{best.store.name}</span></> : null}</p>
-                <div className="mt-1 flex flex-wrap items-baseline gap-3">
-                  <span className="text-4xl font-extrabold tracking-tight">{formatInr(summary.lowestPrice)}</span>
-                  {bestMrp ? (
-                    <>
-                      <span className="text-lg text-slate-400 line-through">{formatInr(bestMrp)}</span>
-                      <Badge tone="green">{discountPct(bestMrp, summary.lowestPrice)}% off MRP</Badge>
-                    </>
-                  ) : null}
+          {comparison.loading ? (
+            <Skeleton className="mb-4 h-24 w-full rounded-2xl" />
+          ) : summary?.lowestPrice ? (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-[#2fda76]/40 bg-gradient-to-r from-[#2fda76]/10 via-[#2fda76]/5 to-transparent p-4 sm:gap-4">
+              <div className="flex flex-col">
+                <span className="mb-1 text-xs font-semibold tracking-wide text-[#2fda76] uppercase">Today&apos;s price</span>
+                <span className="text-3xl font-extrabold sm:text-4xl">{formatInr(summary.lowestPrice)}</span>
+              </div>
+              {bestMrp ? (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm text-slate-500">
+                    M.R.P: <span className="line-through">{formatInr(bestMrp)}</span>
+                  </span>
+                  <span className="w-fit rounded-full bg-[#163b26] px-2.5 py-1 text-sm font-bold text-[#2fda76]">
+                    Save {formatInr(bestMrp - summary.lowestPrice)}
+                  </span>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                    <p className="text-xs text-slate-500">Stores compared</p>
-                    <p className="font-semibold">{summary.availableCount} of {summary.totalListings} in stock</p>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                    <p className="text-xs text-slate-500">You save vs. highest</p>
-                    <p className="font-semibold text-emerald-700">{savingsVsHighest ? formatInr(savingsVsHighest) : '—'}</p>
-                  </div>
-                  <div className="col-span-2 rounded-xl bg-slate-50 px-3 py-2.5 sm:col-span-1">
-                    <p className="text-xs text-slate-500">vs. {days}-day average</p>
-                    <p className={cx('inline-flex items-center gap-1 font-semibold', vsAvg < 0 ? 'text-emerald-700' : vsAvg > 0 ? 'text-rose-600' : '')}>
-                      {vsAvg == null ? '—' : vsAvg === 0 ? 'At average' : (
-                        <>
-                          {vsAvg < 0 ? <ArrowDownRight className="size-4" /> : <ArrowUpRight className="size-4" />}
-                          {formatInr(Math.abs(vsAvg))}
-                        </>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-slate-500">No in-stock prices available right now.</p>
-            )}
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {best ? (
-                <Button href={best.affiliateUrl || best.productUrl} target="_blank" rel="noopener noreferrer" size="lg" className="flex-1 sm:flex-none">
-                  Buy at {best.store?.name} <ExternalLink className="size-4" />
-                </Button>
               ) : null}
-              <Button variant={watched ? 'soft' : 'secondary'} size="lg" onClick={toggleWatch} loading={watchBusy}>
-                <Heart className={cx('size-4', watched && 'fill-brand-600 text-brand-600')} />
-                {watched ? 'Watching' : 'Watch'}
-              </Button>
+              {summary.totalListings > 1 && savingsVsHighest ? (
+                <span className="text-sm text-slate-500 sm:ml-auto">
+                  {formatInr(savingsVsHighest)} cheaper than the priciest of {summary.totalListings} stores
+                </span>
+              ) : null}
             </div>
-          </div>
+          ) : (
+            <div className="mb-4 rounded-2xl border-2 border-white/10 p-4 text-sm text-slate-500">No in-stock price available right now.</div>
+          )}
 
-          <div id="alert" className="mt-6 scroll-mt-24">
-            <AlertCard
-              productId={id}
-              summary={summary}
-              stats={stats}
-              listings={listings}
-              myAlert={detail.data?.myAlert}
-              onChanged={() => detail.reload({ silent: true })}
-            />
+          {best ? (
+            <div className="mb-6 flex items-center gap-3 rounded-xl border border-white/5 bg-[#252627] p-3 sm:p-4">
+              <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#163b26] text-[#2fda76]">
+                <Store className="size-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm text-slate-500">Available at</div>
+                <div className="truncate text-base font-semibold sm:text-lg">{best.store?.name}</div>
+              </div>
+              <div className="shrink-0 text-right text-sm">
+                <div className="text-slate-500">Price verified</div>
+                <div className="text-slate-800">{best.lastCheckedAt ? new Date(best.lastCheckedAt).toLocaleDateString('en-IN') : '—'}</div>
+              </div>
+            </div>
+          ) : null}
+
+          {product.description ? (
+            <p className="mb-6 line-clamp-5 text-base leading-relaxed text-slate-500">{product.description}</p>
+          ) : null}
+
+          {best ? (
+            <>
+              <a
+                href={best.affiliateUrl || best.productUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#22bf63] to-[#49df87] px-10 text-lg font-semibold text-[#ffffff] shadow-lg shadow-[#2fda76]/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-[#2fda76]/50 active:scale-[0.98]"
+              >
+                <span className="truncate">Get this deal on {best.store?.name}</span>
+                <ExternalLink className="size-4 shrink-0" />
+              </a>
+              <div className="mt-4 rounded-lg bg-white/[0.06] p-3 text-sm text-slate-600">
+                Opens {best.store?.name} in a new tab to complete your purchase. Prices and stock can change at any time, and we may earn a
+                commission from qualifying purchases.
+              </div>
+            </>
+          ) : null}
+
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Button variant={watched ? 'soft' : 'secondary'} onClick={toggleWatch} loading={watchBusy} className="rounded-full">
+              <Heart className={cx('size-4', watched && 'fill-current')} />
+              {watched ? 'Watching' : 'Watch'}
+            </Button>
+            <Button
+              variant="secondary"
+              className="rounded-full"
+              onClick={() => document.getElementById('alert')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            >
+              <BellRing className="size-4" />
+              {detail.data?.myAlert ? 'Your alert' : 'Price alert'}
+            </Button>
           </div>
         </div>
       </div>
+
+      <section id="alert" className="mt-12 max-w-2xl scroll-mt-24">
+        <AlertCard
+          productId={id}
+          summary={summary}
+          stats={stats}
+          listings={listings}
+          myAlert={detail.data?.myAlert}
+          onChanged={() => detail.reload({ silent: true })}
+        />
+      </section>
 
       {/* Comparison */}
       <section className="mt-12">
@@ -598,8 +664,8 @@ export default function Product() {
                   type="button"
                   onClick={() => setDays(d)}
                   className={cx(
-                    'rounded-lg px-3 py-1.5 text-sm font-medium transition',
-                    days === d ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                    'dn-chip',
+                    days === d && 'active'
                   )}
                 >
                   {d < 365 ? `${d}d` : '1y'}
@@ -660,20 +726,20 @@ export default function Product() {
       </section>
 
       {similar.data.items.length ? (
-        <section className="mt-12">
-          <h2 className="mb-4 text-xl font-bold tracking-tight">You may also like</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {similar.data.items.slice(0, 4).map((p) => (
-              <ProductCard key={p.id} product={p} />
+        <section className="mt-14">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-xl font-bold">{product.brand ? `More from ${product.brand}` : 'You may also like'}</h2>
+            {product.brand ? (
+              <Link to={`/brands/${encodeURIComponent(product.brand)}`} className="text-xs font-semibold text-brand-600 hover:underline">
+                View all
+              </Link>
+            ) : null}
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+            {similar.data.items.slice(0, 10).map((p) => (
+              <MiniProductCard key={p.id} product={p} />
             ))}
           </div>
-        </section>
-      ) : null}
-
-      {product.description ? (
-        <section className="mt-12">
-          <h2 className="mb-3 text-xl font-bold tracking-tight">About this product</h2>
-          <div className="card p-6 text-sm leading-relaxed whitespace-pre-line text-slate-600">{product.description}</div>
         </section>
       ) : null}
     </div>

@@ -22,7 +22,7 @@ function AuthShell({ title, subtitle, children, footer }) {
         <div className="absolute inset-0 bg-[radial-gradient(40rem_30rem_at_80%_10%,rgb(47_201_127/0.35),transparent),radial-gradient(30rem_20rem_at_10%_90%,rgb(16_185_129/0.35),transparent)]" />
         <div className="relative flex h-full flex-col justify-end p-12 text-[#fafafa]">
           <p className="max-w-md text-3xl leading-tight font-bold">
-            Compare every store. <span className="text-[#2fc97f]">Buy at the right moment.</span>
+            Compare every store. <span className="text-[#2fda76]">Buy at the right moment.</span>
           </p>
           <ul className="mt-8 space-y-3 text-sm text-slate-600">
             {['Compare Amazon, Flipkart, Croma & more', 'Full price history on every product', 'Alerts the moment your target is hit'].map((t) => (
