@@ -1,0 +1,168 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px -4px rgb(15 23 42 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.04), 0 16px 32px -8px rgb(15 23 42 / 0.16);
+
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: -400px 0;
+    }
+    to {
+      background-position: 400px 0;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+}
+
+/*
+ * Shopper theme — dark charcoal with a green accent.
+ * Scoped to .theme-dark (site + auth layouts) so the admin console keeps the light palette.
+ * Tailwind v4 utilities read colours from CSS variables, so remapping the palette here
+ * re-skins every shopper component without touching its markup:
+ *   white → card surface, slate scale inverted (900 = near-white text), brand → green.
+ */
+.theme-dark {
+  color-scheme: dark;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
+  --color-white: #232526;
+  --color-slate-50: #1d1f20;
+  --color-slate-100: #2a2c2e;
+  --color-slate-200: #35373b;
+  --color-slate-300: #46484c;
+  --color-slate-400: #7c7f84;
+  --color-slate-500: #9b9da2;
+  --color-slate-600: #b8babe;
+  --color-slate-700: #d2d3d6;
+  --color-slate-800: #e6e7e9;
+  --color-slate-900: #fafafa;
+  --color-slate-950: #ffffff;
+
+  --color-brand-50: #16291f;
+  --color-brand-100: #1b3628;
+  --color-brand-200: #21503a;
+  --color-brand-300: #2a7a52;
+  --color-brand-400: #29b06d;
+  --color-brand-500: #2fc97f;
+  --color-brand-600: #2fc97f;
+  --color-brand-700: #5ad99b;
+  --color-brand-800: #8be6b9;
+
+  --color-emerald-50: #16291f;
+  --color-emerald-200: #21503a;
+  --color-emerald-500: #2fc97f;
+  --color-emerald-600: #2fc97f;
+  --color-emerald-700: #5ad99b;
+  --color-rose-50: #3a1d22;
+  --color-rose-200: #5c2a32;
+  --color-rose-500: #f0566b;
+  --color-rose-600: #f37383;
+  --color-rose-700: #f59aa6;
+  --color-amber-50: #3a3019;
+  --color-amber-200: #5c4a1f;
+  --color-amber-600: #f2b84b;
+  --color-amber-800: #f5cd7a;
+  --color-sky-50: #172b3a;
+  --color-sky-200: #1f4560;
+  --color-sky-700: #7cc4f0;
+
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.02) inset;
+  --shadow-lift: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+
+  background-color: #181a1b;
+  color: var(--color-slate-900);
+  font-family: var(--font-sans);
+}
+/* Overscroll / behind the layout matches the shopper theme */
+body:has(.theme-dark) {
+  background-color: #181a1b;
+}
+.theme-dark .card {
+  background-color: rgb(37 38 39 / 0.6);
+  border-color: rgb(62 63 66 / 0.35);
+}
+.theme-dark .skeleton {
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.05), transparent);
+}
+/* Green scroll indicator for horizontal rails (category strip) */
+.rail-green {
+  scrollbar-width: thin;
+  scrollbar-color: #2fc97f transparent;
+}
+.rail-green::-webkit-scrollbar {
+  height: 4px;
+}
+.rail-green::-webkit-scrollbar-thumb {
+  background: #2a7a52;
+  border-radius: 9999px;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .card {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-card;
+  }
+  .input {
+    @apply h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100 focus:outline-none disabled:bg-slate-50;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+  .skeleton {
+    @apply rounded-xl bg-slate-200/70;
+    background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+    background-size: 400px 100%;
+    background-repeat: no-repeat;
+    animation: var(--animate-shimmer);
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
