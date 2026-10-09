@@ -1,5 +1,12 @@
 // Dev: Vite proxies /api → localhost:5000. Prod: VITE_API_BASE points at the deployed backend.
-export const API_BASE = import.meta.env.VITE_API_BASE || '/api/v1';
+// Accepts either the full API base (…/api/v1) or just the backend origin — the API prefix
+// is appended when missing, so a VITE_API_BASE without /api/v1 can't break every request.
+const normalizeBase = (raw) => {
+  const base = String(raw || '').trim().replace(/\/+$/, '');
+  if (!base) return '/api/v1';
+  return /\/api\/v\d+$/.test(base) ? base : `${base}/api/v1`;
+};
+export const API_BASE = normalizeBase(import.meta.env.VITE_API_BASE);
 const TOKEN_KEY = 'pc_token';
 
 export const tokenStore = {
