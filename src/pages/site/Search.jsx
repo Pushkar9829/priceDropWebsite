@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { SearchX, X } from 'lucide-react';
 import ProductCard, { ProductCardSkeleton } from '../../components/site/ProductCard';
-import { Button, EmptyState, ErrorBanner, Pagination, cx } from '../../components/ui';
+import { Button, EmptyState, ErrorBanner, Pagination, cx, staggerStyle } from '../../components/ui';
 import { productApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 
@@ -72,7 +72,7 @@ export default function Search() {
     <div className="container-page py-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{heading}</h1>
+          <h1 className="dn-enter dn-d1 text-2xl font-bold tracking-tight">{heading}</h1>
           <p className="mt-1 text-sm text-slate-500">
             {results.loading ? 'Searching…' : `${total.toLocaleString('en-IN')} product${total === 1 ? '' : 's'}`}
           </p>
@@ -177,8 +177,10 @@ export default function Search() {
           ) : items.length ? (
             <>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-                {items.map((p) => (
-                  <ProductCard key={p.id} product={p} />
+                {items.map((p, i) => (
+                  <div key={p.id} className="dn-stagger" style={staggerStyle(i)}>
+                    <ProductCard product={p} />
+                  </div>
                 ))}
               </div>
               <Pagination className="mt-8" page={page} pages={pages} total={total} onChange={(n) => update({ page: String(n) })} />

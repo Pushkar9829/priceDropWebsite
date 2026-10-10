@@ -57,18 +57,40 @@ export const brandLogo = (name = '') => {
   return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=256` : null;
 };
 
-/** Icon + emoji per catalog category (category rail and section headings). */
-const CATEGORY_META = {
-  electronics: { icon: Laptop, emoji: '💻' },
-  fashion: { icon: Shirt, emoji: '👗' },
-  beauty: { icon: Sparkles, emoji: '💄' },
-  home: { icon: Sofa, emoji: '🏠' },
-  'food & beverage': { icon: UtensilsCrossed, emoji: '🍕' },
-  food: { icon: UtensilsCrossed, emoji: '🍕' },
-  sports: { icon: Dumbbell, emoji: '⚽' },
-  automotive: { icon: Car, emoji: '🚗' },
-  toys: { icon: Gamepad2, emoji: '🧸' },
-  pets: { icon: PawPrint, emoji: '🐾' },
+/** 3D category artwork (green glass style) for the "What's on your mind?" rail. */
+const catImg = (file) => new URL(`../assets/cat/${file}.webp`, import.meta.url).href;
+export const CATEGORY_IMAGES = {
+  all: catImg('all'),
+  drops: catImg('deal-of-the-day'),
+  electronics: catImg('electronics'),
+  fashion: catImg('fashion'),
+  beauty: catImg('beauty'),
+  home: catImg('home'),
+  food: catImg('food'),
+  sports: catImg('sports'),
+  automotive: catImg('automotive'),
+  toys: catImg('toys'),
+  pets: catImg('pets'),
+  grocery: catImg('grocery'),
+  wellness: catImg('wellness'),
 };
 
-export const categoryMeta = (name = '') => CATEGORY_META[String(name).trim().toLowerCase()] || { icon: ShoppingBag, emoji: '🛍️' };
+/** Icon + emoji + 3D image per catalog category (category rail and section headings). */
+const CATEGORY_META = {
+  electronics: { icon: Laptop, emoji: '💻', image: CATEGORY_IMAGES.electronics },
+  fashion: { icon: Shirt, emoji: '👗', image: CATEGORY_IMAGES.fashion },
+  beauty: { icon: Sparkles, emoji: '💄', image: CATEGORY_IMAGES.beauty },
+  home: { icon: Sofa, emoji: '🏠', image: CATEGORY_IMAGES.home },
+  'food & beverage': { icon: UtensilsCrossed, emoji: '🍕', image: CATEGORY_IMAGES.food },
+  food: { icon: UtensilsCrossed, emoji: '🍕', image: CATEGORY_IMAGES.food },
+  grocery: { icon: UtensilsCrossed, emoji: '🛒', image: CATEGORY_IMAGES.grocery },
+  health: { icon: Sparkles, emoji: '💚', image: CATEGORY_IMAGES.wellness },
+  wellness: { icon: Sparkles, emoji: '💚', image: CATEGORY_IMAGES.wellness },
+  sports: { icon: Dumbbell, emoji: '⚽', image: CATEGORY_IMAGES.sports },
+  automotive: { icon: Car, emoji: '🚗', image: CATEGORY_IMAGES.automotive },
+  toys: { icon: Gamepad2, emoji: '🧸', image: CATEGORY_IMAGES.toys },
+  pets: { icon: PawPrint, emoji: '🐾', image: CATEGORY_IMAGES.pets },
+};
+
+export const categoryMeta = (name = '') =>
+  CATEGORY_META[String(name).trim().toLowerCase()] || { icon: ShoppingBag, emoji: '🛍️', image: CATEGORY_IMAGES.all };

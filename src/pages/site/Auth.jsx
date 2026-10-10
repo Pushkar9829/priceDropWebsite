@@ -12,7 +12,7 @@ function AuthShell({ title, subtitle, children, footer }) {
       <div className="flex flex-col px-6 py-8 sm:px-12">
         <Logo />
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-12">
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <h1 className="dn-enter dn-d1 text-2xl font-bold tracking-tight">{title}</h1>
           <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
           <div className="mt-8">{children}</div>
           <p className="mt-6 text-center text-sm text-slate-500">{footer}</p>

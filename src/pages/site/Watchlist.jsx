@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Trash2 } from 'lucide-react';
-import { Button, EmptyState, ErrorBanner, ProductThumb, Skeleton } from '../../components/ui';
+import { Button, EmptyState, ErrorBanner, ProductThumb, Skeleton, staggerStyle } from '../../components/ui';
 import { watchlistApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useToast } from '../../context/ToastContext';
@@ -11,7 +11,7 @@ export function PageHeader({ title, description, action }) {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+        <h1 className="dn-enter dn-d1 text-2xl font-bold tracking-tight">{title}</h1>
         {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
       </div>
       {action}
@@ -51,8 +51,8 @@ export default function Watchlist() {
         </div>
       ) : items.length ? (
         <div className="card divide-y divide-slate-100">
-          {items.map(({ id, addedAt, addedPrice, priceChange, product }) => (
-            <div key={id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4">
+          {items.map(({ id, addedAt, addedPrice, priceChange, product }, i) => (
+            <div key={id} className="dn-stagger flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4" style={staggerStyle(i)}>
               <div className="flex min-w-0 flex-1 items-center gap-4">
                 <Link to={`/products/${product.id}`} className="shrink-0">
                   <ProductThumb src={productImage(product.images)} alt={product.title} className="size-20 rounded-xl border border-slate-100 [&_img]:p-2" compact />

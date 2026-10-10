@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { TrendingDown } from 'lucide-react';
 import DealCard from '../../components/site/DealCard';
 import { ProductCardSkeleton } from '../../components/site/ProductCard';
-import { Button, EmptyState, ErrorBanner, Pagination } from '../../components/ui';
+import { Button, EmptyState, ErrorBanner, Pagination, staggerStyle } from '../../components/ui';
 import { dealApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 
@@ -14,10 +14,12 @@ export default function Deals() {
 
   return (
     <div className="container-page py-8">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 px-6 py-10 text-white sm:px-10">
-        <TrendingDown className="absolute -right-6 -bottom-6 size-40 text-white/10" />
-        <h1 className="text-3xl font-extrabold tracking-tight">Today&apos;s price drops</h1>
-        <p className="mt-2 max-w-lg text-emerald-50">
+      <div className="relative overflow-hidden rounded-3xl border border-[#3e3f42]/50 bg-[#252627] px-6 py-10 sm:px-10">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#2fda76]/[0.08] via-transparent to-[#2fda76]/5" />
+        <div className="dn-blobs" />
+        <TrendingDown className="absolute -right-6 -bottom-6 size-40 text-[#2fda76]/10" />
+        <h1 className="dn-enter dn-d1 relative text-3xl font-extrabold tracking-tight">Today&apos;s price drops</h1>
+        <p className="dn-enter dn-d15 relative mt-2 max-w-lg text-slate-500">
           Real drops detected by our hourly price checks — biggest discounts first. Deals expire after 7 days.
         </p>
       </div>
@@ -33,8 +35,10 @@ export default function Deals() {
         ) : deals.data.items.length ? (
           <>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-              {deals.data.items.map((d) => (
-                <DealCard key={d._id} deal={d} />
+              {deals.data.items.map((d, i) => (
+                <div key={d._id} className="dn-stagger" style={staggerStyle(i)}>
+                  <DealCard deal={d} />
+                </div>
               ))}
             </div>
             <Pagination

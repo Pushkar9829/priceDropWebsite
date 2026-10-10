@@ -1,15 +1,16 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BellRing, ChevronLeft, ChevronRight, Flame, MapPin, Sparkle, Tag } from 'lucide-react';
+import { ArrowRight, BellRing, ChevronLeft, ChevronRight, Flame, Sparkle } from 'lucide-react';
 import SearchBox from '../../components/site/SearchBox';
 import ProductCard, { ProductCardSkeleton } from '../../components/site/ProductCard';
 import DealCard from '../../components/site/DealCard';
 import BrandCard from '../../components/site/BrandCard';
-import { Button, ErrorBanner, StoreLogo, cx } from '../../components/ui';
+import { Button, ErrorBanner, LiveDot, StoreLogo, cx, staggerStyle } from '../../components/ui';
+import PriceTicker from '../../components/site/PriceTicker';
 import { brandApi, dealApi, productApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useAuth } from '../../context/AuthContext';
-import { categoryMeta } from '../../lib/brands';
+import { CATEGORY_IMAGES, categoryMeta } from '../../lib/brands';
 
 function SectionTitle({ emoji, icon: Icon, title, count, to, linkLabel = 'See all' }) {
   return (
@@ -21,7 +22,7 @@ function SectionTitle({ emoji, icon: Icon, title, count, to, linkLabel = 'See al
         {count ? <span className="dn-pill px-2 py-0.5 text-xs">{count}</span> : null}
       </h2>
       {to ? (
-        <Link to={to} className="shrink-0 text-sm font-medium text-slate-600 hover:text-slate-900">
+        <Link to={to} className="shrink-0 text-xs font-semibold text-slate-500 transition-colors hover:text-slate-900">
           {linkLabel}
         </Link>
       ) : null}
@@ -33,25 +34,29 @@ function SectionTitle({ emoji, icon: Icon, title, count, to, linkLabel = 'See al
 function CategoryRail({ categories }) {
   const rail = useRef(null);
   const items = [
-    { label: 'All', to: '/search', icon: Sparkle, active: true },
-    { label: 'Price drops', to: '/deals', icon: Tag },
-    ...categories.map((c) => ({ label: c.name, to: `/search?category=${encodeURIComponent(c.name)}`, icon: categoryMeta(c.name).icon })),
+    { label: 'All', to: '/search', image: CATEGORY_IMAGES.all, active: true },
+    { label: 'Price drops', to: '/deals', image: CATEGORY_IMAGES.drops },
+    ...categories.map((c) => ({
+      label: c.name.split(' ')[0],
+      to: `/search?category=${encodeURIComponent(c.name)}`,
+      image: categoryMeta(c.name).image,
+    })),
   ];
 
   return (
     <div className="relative">
-      <div ref={rail} className="rail-green -mx-4 flex gap-2 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">
-        {items.map(({ label, to, icon: Icon, active }) => (
-          <Link key={label} to={to} className="group flex w-24 shrink-0 flex-col items-center gap-2 py-1 sm:w-28">
+      <div ref={rail} className="rail-green -mx-4 flex gap-4 overflow-x-auto px-4 pt-3 pb-3 sm:mx-0 sm:px-0">
+        {items.map(({ label, to, image, active }) => (
+          <Link key={to} to={to} aria-current={active ? 'true' : undefined} className="flex w-fit min-w-[84px] shrink-0 flex-col items-center gap-2">
+            <span className={cx('block transition-all duration-300', active ? 'scale-110' : 'opacity-85 hover:opacity-100')}>
+              <img src={image} alt="" width={192} height={192} decoding="async" className="size-[68px] object-contain" />
+            </span>
             <span
               className={cx(
-                'grid size-16 place-items-center rounded-2xl bg-gradient-to-br from-[#2fda76]/30 to-[#163b26] text-[#2fda76] ring-1 ring-[#2fda76]/20 transition-all duration-300',
-                active ? 'scale-110 from-[#2fda76]/50 ring-[#2fda76]/50' : 'opacity-85 group-hover:opacity-100'
+                'text-center text-[13px] leading-tight font-bold tracking-tight whitespace-nowrap md:text-sm',
+                active ? 'text-slate-900' : 'text-slate-500'
               )}
             >
-              <Icon className="size-7" strokeWidth={1.75} />
-            </span>
-            <span className={cx('text-center text-sm font-semibold', active ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-900')}>
               {label}
             </span>
           </Link>
@@ -79,6 +84,7 @@ export default function Home() {
   const categories = useAsync(() => productApi.categories(), [], { initial: { items: [] } });
   const stores = useAsync(() => productApi.stores(), [], { initial: { items: [] } });
   const brandWalls = useAsync(() => brandApi.categories({ limit: 12 }), [], { initial: { sections: [], totalBrands: 0 } });
+  const tickerSrc = useAsync(() => productApi.search({ limit: 40 }), [], { initial: { items: [] } });
   const dropsRail = useRef(null);
 
   // One card per product: a product dropping at two stores shouldn't fill two slots
@@ -92,6 +98,21 @@ export default function Home() {
     }
   }
 
+  // Ticker: real price drops first, then catalog items currently below MRP
+  const tickerItems = [
+    ...dealItems.map((d) => ({
+      id: d.productId?._id || d.productId?.id,
+      brand: d.productId?.brand,
+      discount: Math.round(d.discountPercent || 0),
+      price: d.currentPrice,
+    })),
+    ...(tickerSrc.data?.items || [])
+      .filter((p) => p.discountPercent > 0 && p.lowestPrice)
+      .map((p) => ({ id: p.id, brand: p.brand, discount: p.discountPercent, price: p.lowestPrice })),
+  ]
+    .filter((t) => t.id && t.discount > 0)
+    .slice(0, 20);
+
   const storeItems = stores.data?.items || [];
   const totalBrands = brandWalls.data?.totalBrands || 0;
   const statLine = [
@@ -104,23 +125,26 @@ export default function Home() {
 
   return (
     <div>
+      <PriceTicker items={tickerItems} />
+
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_26rem_at_10%_-10%,rgb(47_201_127/0.14),transparent_70%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#2fda76]/[0.08] via-transparent to-[#2fda76]/5" />
+        <div className="dn-blobs" />
         <div className="relative container-page pt-10 pb-6 sm:pt-14">
-          <span className="inline-flex animate-fade-up items-center gap-1.5 rounded-full bg-[#163b26] px-3 py-1 text-xs font-semibold text-[#2fda76]">
-            <MapPin className="size-3.5" /> Live price drops · India
+          <span className="dn-enter inline-flex items-center gap-2 rounded-full bg-[#163b26] px-3 py-1 text-xs font-semibold text-[#2fda76]">
+            <LiveDot className="size-2" /> Live price drops · India
           </span>
-          <h1 className="mt-5 max-w-4xl animate-fade-up text-4xl leading-[1.08] font-bold tracking-tight [animation-delay:60ms] sm:text-6xl">
+          <h1 className="dn-enter dn-d1 mt-5 max-w-4xl text-4xl leading-[1.08] font-bold tracking-tight sm:text-6xl">
             <span className="block text-slate-900">Don&apos;t overpay again.</span>
-            <span className="block text-[#2fda76]">Pay the lowest price, always.</span>
+            <span className="text-gradient-primary block">Pay the lowest price, always.</span>
           </h1>
-          {statLine ? <p className="mt-3 text-[15px] text-slate-500">{statLine}</p> : null}
-          <div className="mt-7 max-w-xl animate-fade-up [animation-delay:120ms]">
+          {statLine ? <p className="dn-enter dn-d15 mt-3 text-[15px] text-slate-500">{statLine}</p> : null}
+          <div className="dn-enter dn-d2 mt-7 max-w-xl">
             <SearchBox size="lg" />
           </div>
           {storeItems.length ? (
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500">
+            <div className="dn-enter dn-d25 mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500">
               <span className="text-xs font-semibold tracking-wider uppercase">Comparing</span>
               {storeItems.map((s) => (
                 <span key={s._id} className="inline-flex items-center gap-1.5 font-medium text-slate-700">
@@ -179,8 +203,8 @@ export default function Home() {
           </div>
         ) : dealItems.length ? (
           <div ref={dropsRail} className="scrollbar-none -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-            {dealItems.map((d) => (
-              <div key={d._id} className="w-56 shrink-0 snap-start">
+            {dealItems.map((d, i) => (
+              <div key={d._id} className="dn-stagger w-56 shrink-0 snap-start" style={staggerStyle(i)}>
                 <DealCard deal={d} />
               </div>
             ))}
@@ -202,8 +226,10 @@ export default function Home() {
             to={`/search?category=${encodeURIComponent(section.category)}`}
           />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-            {section.brands.map((b) => (
-              <BrandCard key={b.slug || b.name} brand={b} />
+            {section.brands.map((b, i) => (
+              <div key={b.slug || b.name} className="dn-stagger" style={staggerStyle(i)}>
+                <BrandCard brand={b} />
+              </div>
             ))}
           </div>
         </section>
@@ -213,11 +239,23 @@ export default function Home() {
       <section className="container-page pt-12">
         <SectionTitle icon={Sparkle} title="Fresh prices" to="/search" />
         {fresh.error ? <ErrorBanner error={{ message: 'Couldn’t load products right now.' }} onRetry={fresh.reload} /> : null}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-          {fresh.loading
-            ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-            : fresh.data.items.map((p) => <ProductCard key={p.id} product={p} />)}
-        </div>
+        {fresh.loading ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+          </div>
+        ) : fresh.data.items.length ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            {fresh.data.items.map((p, i) => (
+              <div key={p.id} className="dn-stagger" style={staggerStyle(i)}>
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center text-sm text-slate-500">
+            No priced products yet. Search a brand or wait for listings to refresh.
+          </p>
+        )}
       </section>
 
       {/* CTA */}

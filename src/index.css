@@ -1,7 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* droppingnow status colours (bg-drop-light text-drop, bg-new-light text-new, …) */
+  --color-drop: #2fda76;
+  --color-drop-light: #163b26;
+  --color-new: #be5eed;
+  --color-new-light: #300845;
+  --color-hot: #ff7a1a;
+  --color-hot-light: #4d2100;
+  --color-yellow: #ffbf00;
+  --color-yellow-light: #4d3a00;
+
+  --animate-fade-in: fade-in 0.4s ease-out forwards;
+  --animate-fade-in-up: fade-in-up 0.5s ease-out forwards;
+  --animate-scale-in: scale-in 0.3s ease-out forwards;
+  --animate-bounce-subtle: bounce-subtle 2s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes bounce-subtle {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
 
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
@@ -65,7 +131,7 @@
  */
 .theme-dark {
   color-scheme: dark;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Nunito Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Nunito Sans', 'SF Pro Display', 'SF Pro Text', 'Plus Jakarta Sans', system-ui, sans-serif;
 
   /* droppingnow tokens (hsl values from the source, converted) */
   --dn-primary: #2fda76;
@@ -297,8 +363,117 @@ body:has(.theme-dark) {
 .dn-page {
   animation: dn-fade-in 0.4s ease-out both;
 }
+
+/* Section entrance — framer `initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }}`,
+ * staggered with the source's delays (.dn-d1 … .dn-d3 = 0.1s … 0.3s). */
+@keyframes dn-enter {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.dn-enter {
+  animation: dn-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dn-d1 {
+  animation-delay: 0.1s;
+}
+.dn-d15 {
+  animation-delay: 0.15s;
+}
+.dn-d2 {
+  animation-delay: 0.2s;
+}
+.dn-d25 {
+  animation-delay: 0.25s;
+}
+.dn-d3 {
+  animation-delay: 0.3s;
+}
+/* Grid cascade — `animate-fade-in` + animationDelay index * 0.03s (see staggerStyle) */
+.dn-stagger {
+  animation: dn-fade-in 0.4s ease-out both;
+}
+.dn-stagger > * {
+  height: 100%;
+}
+
+/* Drifting glow blobs behind page headers (10s and 14s+3s loops) */
+@keyframes dn-blob-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, -20px) scale(1.3);
+  }
+}
+@keyframes dn-blob-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-30px, 0) scale(1.2);
+  }
+}
+.dn-blobs {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.dn-blobs::before,
+.dn-blobs::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+}
+.dn-blobs::before {
+  top: -6rem;
+  right: -6rem;
+  width: 300px;
+  height: 300px;
+  background: rgb(47 218 118 / 0.1);
+  filter: blur(80px);
+  animation: dn-blob-a 10s ease-in-out infinite;
+}
+.dn-blobs::after {
+  bottom: -6rem;
+  left: -6rem;
+  width: 250px;
+  height: 250px;
+  background: rgb(47 218 118 / 0.08);
+  filter: blur(70px);
+  animation: dn-blob-b 14s ease-in-out 3s infinite;
+}
+
+/* Live price ticker — 40s marquee, pauses on hover */
+@keyframes dn-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.dn-ticker {
+  animation: dn-ticker 40s linear infinite;
+}
+.dn-ticker:hover {
+  animation-play-state: paused;
+}
 @media (prefers-reduced-motion: reduce) {
   .dn-page,
+  .dn-enter,
+  .dn-stagger,
+  .dn-ticker,
+  .dn-blobs::before,
+  .dn-blobs::after,
   .dn-card,
   .dn-brand-card,
   .dn-zoom,
@@ -310,6 +485,56 @@ body:has(.theme-dark) {
 }
 .theme-dark .skeleton {
   background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.05), transparent);
+}
+.theme-dark {
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+/* Display tracking on headings */
+.theme-dark :is(h1, h2, h3) {
+  letter-spacing: -0.01em;
+}
+/* Thin green scrollbars everywhere in the shopper UI */
+.theme-dark,
+.theme-dark * {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(47 218 118 / 0.35) transparent;
+}
+.theme-dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.theme-dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.theme-dark ::-webkit-scrollbar-thumb {
+  background: rgb(47 218 118 / 0.32);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.theme-dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(47 218 118 / 0.52);
+}
+html:has(.theme-dark) {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(47 218 118 / 0.35) transparent;
+}
+/* Gradient helpers */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #22bf63, #49df87);
+}
+.bg-gradient-hero {
+  background: linear-gradient(180deg, #252627 0%, #181a1b 100%);
+}
+.text-gradient-primary {
+  background: linear-gradient(135deg, #22bf63, #49df87);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.shadow-lg-primary {
+  box-shadow: 0 4px 12px hsl(0 0% 0% / 0.45);
 }
 /* Green scroll indicator for horizontal rails (category strip) */
 .rail-green {

@@ -13,7 +13,7 @@ import {
   Store,
   Trophy,
 } from 'lucide-react';
-import { Badge, Button, EmptyState, ErrorBanner, ProductThumb, Skeleton, StatusBadge, StoreLogo, cx } from '../../components/ui';
+import { Badge, Button, EmptyState, ErrorBanner, ProductThumb, Skeleton, StatusBadge, StoreLogo, cx, staggerStyle } from '../../components/ui';
 import { alertApi, notifyInboxChanged, productApi, watchlistApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useAuth } from '../../context/AuthContext';
@@ -505,7 +505,7 @@ export default function Product() {
               {product.brand}
             </Link>
           ) : null}
-          <h1 className="mb-6 text-2xl leading-tight font-bold sm:text-3xl">{product.title}</h1>
+          <h1 className="dn-enter dn-d1 mb-6 text-2xl leading-tight font-bold sm:text-3xl">{product.title}</h1>
 
           {comparison.loading ? (
             <Skeleton className="mb-4 h-24 w-full rounded-2xl" />
@@ -736,8 +736,10 @@ export default function Product() {
             ) : null}
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
-            {similar.data.items.slice(0, 10).map((p) => (
-              <MiniProductCard key={p.id} product={p} />
+            {similar.data.items.slice(0, 10).map((p, i) => (
+              <div key={p.id} className="dn-stagger" style={staggerStyle(i)}>
+                <MiniProductCard product={p} />
+              </div>
             ))}
           </div>
         </section>

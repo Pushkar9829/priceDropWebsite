@@ -2,7 +2,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import { ArrowLeft, PackageSearch } from 'lucide-react';
 import ProductCard, { ProductCardSkeleton } from '../../components/site/ProductCard';
 import { BrandLogo } from '../../components/site/BrandCard';
-import { Button, EmptyState, ErrorBanner, Pagination } from '../../components/ui';
+import { Button, EmptyState, ErrorBanner, Pagination, staggerStyle } from '../../components/ui';
 import { productApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 
@@ -53,8 +53,8 @@ export default function Brand() {
         <div className="flex items-center gap-4">
           <BrandLogo name={brand} size="lg" />
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{brand}</h1>
-            <p className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-slate-500">
+            <h1 className="dn-enter dn-d1 text-3xl font-bold tracking-tight">{brand}</h1>
+            <p className="dn-enter dn-d15 mt-1 flex flex-wrap items-center gap-x-3 text-sm text-slate-500">
               {category ? <span>{category}</span> : null}
               {!list.loading ? <span>{list.data.total} product{list.data.total === 1 ? '' : 's'}</span> : null}
               {deals ? <span className="font-semibold text-brand-600">Up to {maxOff}% off</span> : null}
@@ -83,8 +83,10 @@ export default function Brand() {
         ) : items.length ? (
           <>
             <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {items.map((p) => (
-                <ProductCard key={p.id} product={p} />
+              {items.map((p, i) => (
+                <div key={p.id} className="dn-stagger" style={staggerStyle(i)}>
+                  <ProductCard product={p} />
+                </div>
               ))}
             </div>
             <Pagination className="mt-8" page={page} pages={list.data.pages} total={list.data.total} onChange={(n) => set({ page: String(n) })} />

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Bell, CheckCheck } from 'lucide-react';
-import { Button, EmptyState, ErrorBanner, Pagination, Skeleton, cx } from '../../components/ui';
+import { Button, EmptyState, ErrorBanner, Pagination, Skeleton, cx, staggerStyle } from '../../components/ui';
 import { notificationApi, notifyInboxChanged } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useToast } from '../../context/ToastContext';
@@ -75,11 +75,11 @@ export default function Notifications() {
       ) : items.length ? (
         <>
           <div className="card divide-y divide-slate-100 overflow-hidden">
-            {items.map((n) => {
+            {items.map((n, i) => {
               const unreadItem = n.status !== 'READ';
               const pid = n.meta?.productId;
               const Body = (
-                <div className={cx('dn-row flex gap-3 px-5 py-4', unreadItem && 'bg-brand-50/40')}>
+                <div className={cx('dn-row dn-stagger flex gap-3 px-5 py-4', unreadItem && 'bg-brand-50/40')} style={staggerStyle(i)}>
                   <span className={cx('mt-1.5 size-2 shrink-0 rounded-full', unreadItem ? 'bg-brand-500' : 'bg-transparent')} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-3">

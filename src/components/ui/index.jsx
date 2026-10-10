@@ -335,3 +335,16 @@ export function ProductThumb({ src, alt = '', className, fallback, compact = fal
     </div>
   );
 }
+
+/** Grid cascade delay: index * 30ms, capped so long lists don't wait seconds. */
+export const staggerStyle = (index) => ({ animationDelay: `${Math.min(index, 24) * 0.03}s` });
+
+/** Pinging green "live" dot. */
+export function LiveDot({ className }) {
+  return (
+    <span className={cx('relative inline-flex size-2.5 shrink-0', className)} aria-hidden>
+      <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#2fda76] opacity-75" />
+      <span className="relative inline-flex size-2.5 rounded-full bg-[#2fda76]" />
+    </span>
+  );
+}
