@@ -137,6 +137,15 @@ export const offerApi = {
   forDomain: (domain) => get(`/offers/for-domain${toQuery({ domain })}`).then(asList),
 };
 
+/** Admin-controlled site settings (sections on/off, affiliate ids, travel widgets). */
+export const siteApi = {
+  config: () => get('/site-config'),
+};
+
+export const travelApi = {
+  get: () => get('/travel'),
+};
+
 export const brandApi = {
   top: (params = {}) => get(`/brands/top${toQuery(params)}`).then(asList),
   categories: (params = {}) =>
@@ -195,5 +204,13 @@ export const adminApi = {
   notifications: (params) => get(`/admin/notifications${toQuery(params)}`).then(asList),
   deals: (params) => get(`/admin/deals${toQuery(params)}`).then(asList),
   createDeal: (body) => post('/admin/deals', body),
+  affiliateSettings: () => get('/admin/affiliate/settings'),
+  updateAffiliateSettings: (body) => request('/admin/affiliate/settings', { method: 'PUT', body }),
+  affiliateStatus: () => get('/admin/affiliate/status'),
+  syncAffiliate: () => post('/admin/affiliate/sync'),
+  affiliateCampaigns: (params) => get(`/admin/affiliate/campaigns${toQuery(params)}`).then(asList),
+  updateAffiliateCampaign: (id, body) => patch(`/admin/affiliate/campaigns/${id}`, body),
+  affiliateOffers: (params) => get(`/admin/affiliate/offers${toQuery(params)}`).then(asList),
+  updateAffiliateOffer: (id, body) => patch(`/admin/affiliate/offers/${id}`, body),
   updateDeal: (id, body) => patch(`/admin/deals/${id}`, body),
 };

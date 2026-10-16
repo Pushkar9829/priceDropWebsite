@@ -19,6 +19,8 @@ import { Login, Register } from './pages/site/Auth';
 import NotFound from './pages/site/NotFound';
 import { About, AffiliateDisclosure, Privacy, Terms } from './pages/site/Legal';
 import { Offers, StorePage, Stores } from './pages/site/Offers';
+import Travel from './pages/site/Travel';
+import { SiteConfigProvider, useSiteConfig } from './context/SiteConfigContext';
 
 // Admin console is code-split so shoppers never download it
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -32,6 +34,15 @@ const AdminHistory = lazy(() => import('./pages/admin/Records').then((m) => ({ d
 const AdminDeals = lazy(() => import('./pages/admin/Records').then((m) => ({ default: m.Deals })));
 const AdminUsers = lazy(() => import('./pages/admin/Records').then((m) => ({ default: m.Users })));
 const AdminNotifications = lazy(() => import('./pages/admin/Records').then((m) => ({ default: m.Notifications })));
+const AffiliateSettings = lazy(() => import('./pages/admin/Affiliate').then((m) => ({ default: m.AffiliateSettings })));
+const PartnerStores = lazy(() => import('./pages/admin/Affiliate').then((m) => ({ default: m.PartnerStores })));
+const AffiliateOffers = lazy(() => import('./pages/admin/Affiliate').then((m) => ({ default: m.AffiliateOffers })));
+
+/** A page that exists only while its section is switched on in Admin → Affiliate settings. */
+function Section({ name, children }) {
+  const { sections } = useSiteConfig();
+  return sections[name] === false ? <NotFound /> : children;
+}
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -59,6 +70,7 @@ export default function App() {
     <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
+          <SiteConfigProvider>
           <ScrollToTop />
           <RoutedBoundary>
           <Suspense fallback={Loading}>
@@ -72,9 +84,10 @@ export default function App() {
                 <Route path="products/:id" element={<Product />} />
                 <Route path="deals" element={<Deals />} />
                 <Route path="brands/:name" element={<Brand />} />
-                <Route path="offers" element={<Offers />} />
-                <Route path="stores" element={<Stores />} />
-                <Route path="stores/:slug" element={<StorePage />} />
+                <Route path="offers" element={<Section name="offers"><Offers /></Section>} />
+                <Route path="stores" element={<Section name="stores"><Stores /></Section>} />
+                <Route path="stores/:slug" element={<Section name="stores"><StorePage /></Section>} />
+                <Route path="travel" element={<Section name="travel"><Travel /></Section>} />
                 <Route element={<RequireAuth />}>
                   <Route path="watchlist" element={<Watchlist />} />
                   <Route path="alerts" element={<Alerts />} />
@@ -100,11 +113,15 @@ export default function App() {
                   <Route path="deals" element={<AdminDeals />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="notifications" element={<AdminNotifications />} />
+                  <Route path="affiliate" element={<AffiliateSettings />} />
+                  <Route path="partner-stores" element={<PartnerStores />} />
+                  <Route path="offers" element={<AffiliateOffers />} />
                 </Route>
               </Route>
             </Routes>
           </Suspense>
           </RoutedBoundary>
+          </SiteConfigProvider>
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>

@@ -2,7 +2,11 @@
 // The Cuelinks page script only wires up <a> tags present when it loads, so links this SPA
 // renders later would go out untracked. We build the same tracking URL ourselves instead
 // (format as returned by the Cuelinks API for this channel).
-const CUELINKS_CID = import.meta.env.VITE_CUELINKS_CID || '279120';
+// Channel id: set at runtime from Admin → Affiliate settings (/site-config); env/default until then
+let CUELINKS_CID = import.meta.env.VITE_CUELINKS_CID || '279120';
+export const setCuelinksCid = (cid) => {
+  CUELINKS_CID = cid ? String(cid) : '';
+};
 const ALREADY_TRACKED = /(^|\.)(linksredirect\.com|clnk\.in)$/i;
 
 /**

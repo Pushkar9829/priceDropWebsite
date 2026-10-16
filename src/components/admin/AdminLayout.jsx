@@ -3,6 +3,9 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   Activity,
   Bell,
+  BadgePercent,
+  Settings2,
+  Ticket,
   ExternalLink,
   History,
   LayoutDashboard,
@@ -39,6 +42,14 @@ const GROUPS = [
       { to: '/admin/stores', label: 'Stores', icon: Store },
       { to: '/admin/price-history', label: 'Price history', icon: History },
       { to: '/admin/deals', label: 'Deals', icon: Tag },
+    ],
+  },
+  {
+    label: 'Affiliate',
+    links: [
+      { to: '/admin/affiliate', label: 'Affiliate settings', icon: Settings2 },
+      { to: '/admin/partner-stores', label: 'Partner stores', icon: BadgePercent },
+      { to: '/admin/offers', label: 'Offers', icon: Ticket },
     ],
   },
   {

@@ -7,6 +7,7 @@ import {
   Heart,
   LayoutDashboard,
   Laptop,
+  Plane,
   LogOut,
   Menu,
   Shirt,
@@ -18,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useSiteConfig } from '../../context/SiteConfigContext';
 import { INBOX_EVENT, notificationApi } from '../../lib/api';
 import { Button, cx } from '../ui';
 import SearchBox from './SearchBox';
@@ -41,7 +43,8 @@ export function Logo({ className }) {
 const NAV = [
   { to: '/search', label: 'All', icon: Sparkle, match: (l) => l.pathname === '/search' && !l.search.includes('category=') },
   { to: '/deals', label: 'Deals', icon: Tag, match: (l) => l.pathname === '/deals' },
-  { to: '/offers', label: 'Coupons', icon: Ticket, match: (l) => l.pathname === '/offers' || l.pathname.startsWith('/stores') },
+  { to: '/offers', label: 'Coupons', icon: Ticket, section: 'offers', match: (l) => l.pathname === '/offers' || l.pathname.startsWith('/stores') },
+  { to: '/travel', label: 'Travel', icon: Plane, section: 'travel', match: (l) => l.pathname === '/travel' },
   { to: '/search?category=Electronics', label: 'Tech', icon: Laptop, match: (l) => l.search.includes('category=Electronics') },
   { to: '/search?category=Fashion', label: 'Fashion', icon: Shirt, match: (l) => l.search.includes('category=Fashion') },
   { to: '/search?category=Home', label: 'Home', icon: Sofa, match: (l) => l.search.includes('category=Home') },
@@ -151,6 +154,9 @@ export default function SiteLayout() {
     };
   }, [isAuthenticated, location.pathname]);
 
+  const { sections } = useSiteConfig();
+  // Sections switched off in Admin → Affiliate settings drop out of the menu
+  const nav = NAV.filter((n) => !n.section || sections[n.section] !== false);
   const isHome = location.pathname === '/';
   const iconBtn = 'relative grid size-10 place-items-center rounded-full text-[#fafafa]/60 transition-colors hover:bg-[#fafafa]/5 hover:text-[#fafafa]';
 
@@ -161,7 +167,7 @@ export default function SiteLayout() {
           <Logo />
 
           <nav className="mx-auto hidden items-center gap-1 md:flex" aria-label="Main">
-            {NAV.map(({ to, label, icon: Icon, match }) => {
+            {nav.map(({ to, label, icon: Icon, match }) => {
               const active = match(location);
               return (
                 <NavLink
@@ -228,7 +234,7 @@ export default function SiteLayout() {
         {mobileOpen ? (
           <div className="border-t border-white/5 md:hidden">
             <nav className="container-page flex flex-col gap-1 py-3" aria-label="Mobile">
-              {NAV.map(({ to, label, icon: Icon }) => (
+              {nav.map(({ to, label, icon: Icon }) => (
                 <NavLink key={to} to={to} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 dn-row">
                   <Icon className="size-4" /> {label}
                 </NavLink>
@@ -292,8 +298,9 @@ export default function SiteLayout() {
             <p className="text-sm font-semibold">Explore</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-500">
               <li><Link to="/deals" className="dn-link">Price drops</Link></li>
-              <li><Link to="/offers" className="dn-link">Coupons &amp; offers</Link></li>
-              <li><Link to="/stores" className="dn-link">All stores</Link></li>
+              {sections.offers !== false ? <li><Link to="/offers" className="dn-link">Coupons &amp; offers</Link></li> : null}
+              {sections.stores !== false ? <li><Link to="/stores" className="dn-link">All stores</Link></li> : null}
+              {sections.travel !== false ? <li><Link to="/travel" className="dn-link">Travel deals</Link></li> : null}
               <li><Link to="/search?sort=newest" className="dn-link">New arrivals</Link></li>
               <li><Link to="/search" className="dn-link">All products</Link></li>
             </ul>
