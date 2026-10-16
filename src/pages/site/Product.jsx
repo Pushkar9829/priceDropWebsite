@@ -19,6 +19,7 @@ import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { discountPct, formatDate, formatInr, productImage, timeAgo } from '../../lib/format';
+import { outboundUrl } from '../../lib/affiliate';
 
 const PriceChart = lazy(() => import('../../components/site/PriceChart'));
 const RANGES = [30, 90, 180, 365];
@@ -132,7 +133,7 @@ function ListingRow({ row, best }) {
           </div>
         </div>
         <Button
-          href={row.affiliateUrl || row.productUrl}
+          href={outboundUrl(row, 'compare_row')}
           target="_blank"
           rel="noopener noreferrer"
           variant={row.isBestPrice ? 'success' : 'secondary'}
@@ -558,7 +559,7 @@ export default function Product() {
           {best ? (
             <>
               <a
-                href={best.affiliateUrl || best.productUrl}
+                href={outboundUrl(best, 'product_cta')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-br from-[#22bf63] to-[#49df87] px-10 text-lg font-semibold text-[#ffffff] shadow-lg shadow-[#2fda76]/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-[#2fda76]/50 active:scale-[0.98]"
