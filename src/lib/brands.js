@@ -89,6 +89,7 @@ const CATEGORY_META = {
   sports: { icon: Dumbbell, emoji: '⚽', image: CATEGORY_IMAGES.sports },
   automotive: { icon: Car, emoji: '🚗', image: CATEGORY_IMAGES.automotive },
   toys: { icon: Gamepad2, emoji: '🧸', image: CATEGORY_IMAGES.toys },
+  'baby & kids': { icon: Gamepad2, emoji: '🍼', image: CATEGORY_IMAGES.toys },
   pets: { icon: PawPrint, emoji: '🐾', image: CATEGORY_IMAGES.pets },
 };
 
