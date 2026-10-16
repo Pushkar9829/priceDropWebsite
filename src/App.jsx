@@ -18,6 +18,7 @@ import Account from './pages/site/Account';
 import { Login, Register } from './pages/site/Auth';
 import NotFound from './pages/site/NotFound';
 import { About, AffiliateDisclosure, Privacy, Terms } from './pages/site/Legal';
+import { Offers, StorePage, Stores } from './pages/site/Offers';
 
 // Admin console is code-split so shoppers never download it
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -71,6 +72,9 @@ export default function App() {
                 <Route path="products/:id" element={<Product />} />
                 <Route path="deals" element={<Deals />} />
                 <Route path="brands/:name" element={<Brand />} />
+                <Route path="offers" element={<Offers />} />
+                <Route path="stores" element={<Stores />} />
+                <Route path="stores/:slug" element={<StorePage />} />
                 <Route element={<RequireAuth />}>
                   <Route path="watchlist" element={<Watchlist />} />
                   <Route path="alerts" element={<Alerts />} />

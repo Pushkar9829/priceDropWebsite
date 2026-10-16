@@ -14,12 +14,13 @@ import {
   Trophy,
 } from 'lucide-react';
 import { Badge, Button, EmptyState, ErrorBanner, ProductThumb, Skeleton, StatusBadge, StoreLogo, cx, staggerStyle } from '../../components/ui';
-import { alertApi, notifyInboxChanged, productApi, watchlistApi } from '../../lib/api';
+import { alertApi, notifyInboxChanged, offerApi, productApi, watchlistApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { discountPct, formatDate, formatInr, productImage, timeAgo } from '../../lib/format';
 import { outboundUrl } from '../../lib/affiliate';
+import OfferCard from '../../components/site/OfferCard';
 
 const PriceChart = lazy(() => import('../../components/site/PriceChart'));
 const RANGES = [30, 90, 180, 365];
@@ -80,6 +81,24 @@ function MiniProductCard({ product }) {
       <p className="mt-1 line-clamp-2 text-sm leading-snug font-medium text-slate-900 group-hover:text-[#2fda76]">{product.title}</p>
       <p className="mt-1.5 text-base font-bold">{formatInr(product.lowestPrice)}</p>
     </Link>
+  );
+}
+
+/** Live coupons for the cheapest store (Cuelinks offers feed). Renders nothing when there are none. */
+function StoreOffers({ domain, storeName }) {
+  const offers = useAsync(() => (domain ? offerApi.forDomain(domain) : Promise.resolve({ items: [] })), [domain], {
+    initial: { items: [] },
+  });
+  if (!offers.data.items.length) return null;
+  return (
+    <section className="mt-10">
+      <h2 className="mb-4 text-xl font-bold">Offers from {storeName}</h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {offers.data.items.slice(0, 3).map((o) => (
+          <OfferCard key={o.id} offer={o} showStore={false} />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -590,6 +609,8 @@ export default function Product() {
           </div>
         </div>
       </div>
+
+      {best?.store?.domain ? <StoreOffers domain={best.store.domain} storeName={best.store.name} /> : null}
 
       <section id="alert" className="mt-12 max-w-2xl scroll-mt-24">
         <AlertCard

@@ -13,6 +13,7 @@ import {
   Sofa,
   Sparkle,
   Tag,
+  Ticket,
   User,
   X,
 } from 'lucide-react';
@@ -40,6 +41,7 @@ export function Logo({ className }) {
 const NAV = [
   { to: '/search', label: 'All', icon: Sparkle, match: (l) => l.pathname === '/search' && !l.search.includes('category=') },
   { to: '/deals', label: 'Deals', icon: Tag, match: (l) => l.pathname === '/deals' },
+  { to: '/offers', label: 'Coupons', icon: Ticket, match: (l) => l.pathname === '/offers' || l.pathname.startsWith('/stores') },
   { to: '/search?category=Electronics', label: 'Tech', icon: Laptop, match: (l) => l.search.includes('category=Electronics') },
   { to: '/search?category=Fashion', label: 'Fashion', icon: Shirt, match: (l) => l.search.includes('category=Fashion') },
   { to: '/search?category=Home', label: 'Home', icon: Sofa, match: (l) => l.search.includes('category=Home') },
@@ -290,6 +292,8 @@ export default function SiteLayout() {
             <p className="text-sm font-semibold">Explore</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-500">
               <li><Link to="/deals" className="dn-link">Price drops</Link></li>
+              <li><Link to="/offers" className="dn-link">Coupons &amp; offers</Link></li>
+              <li><Link to="/stores" className="dn-link">All stores</Link></li>
               <li><Link to="/search?sort=newest" className="dn-link">New arrivals</Link></li>
               <li><Link to="/search" className="dn-link">All products</Link></li>
             </ul>

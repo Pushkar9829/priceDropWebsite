@@ -128,6 +128,15 @@ export const dealApi = {
   list: (params = {}) => get(`/deals${toQuery(params)}`).then(asList),
 };
 
+/** Affiliate stores + live coupons/deals (Cuelinks). */
+export const offerApi = {
+  list: (params = {}) => get(`/offers${toQuery(params)}`).then(asList),
+  stores: (params = {}) =>
+    get(`/offers/stores${toQuery(params)}`).then((d) => ({ ...asList(d), categories: d?.categories || [] })),
+  store: (slug) => get(`/offers/stores/${encodeURIComponent(slug)}`),
+  forDomain: (domain) => get(`/offers/for-domain${toQuery({ domain })}`).then(asList),
+};
+
 export const brandApi = {
   top: (params = {}) => get(`/brands/top${toQuery(params)}`).then(asList),
   categories: (params = {}) =>
