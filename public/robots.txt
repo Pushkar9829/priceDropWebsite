@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin
+Disallow: /account
+Disallow: /watchlist
+Disallow: /alerts
+Disallow: /notifications
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://www.droppingnow.com/sitemap.xml

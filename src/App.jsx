@@ -17,6 +17,7 @@ import Notifications from './pages/site/Notifications';
 import Account from './pages/site/Account';
 import { Login, Register } from './pages/site/Auth';
 import NotFound from './pages/site/NotFound';
+import { About, AffiliateDisclosure, Privacy, Terms } from './pages/site/Legal';
 
 // Admin console is code-split so shoppers never download it
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -76,6 +77,10 @@ export default function App() {
                   <Route path="notifications" element={<Notifications />} />
                   <Route path="account" element={<Account />} />
                 </Route>
+                <Route path="about" element={<About />} />
+                <Route path="privacy" element={<Privacy />} />
+                <Route path="terms" element={<Terms />} />
+                <Route path="affiliate-disclosure" element={<AffiliateDisclosure />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
 

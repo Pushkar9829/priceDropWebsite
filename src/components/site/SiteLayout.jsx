@@ -314,9 +314,18 @@ export default function SiteLayout() {
           </div>
         </div>
         <div className="border-t border-white/5">
-          <p className="container-page py-5 text-xs text-slate-500">
-            © {new Date().getFullYear()} PriceCompare. Prices are collected periodically and may differ from the store.
-          </p>
+          <div className="container-page flex flex-col gap-3 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} droppingnow. Prices are collected periodically and may differ from the store. We may earn a
+              commission from store links.
+            </p>
+            <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legal">
+              <Link to="/about" className="dn-link">About</Link>
+              <Link to="/privacy" className="dn-link">Privacy</Link>
+              <Link to="/terms" className="dn-link">Terms</Link>
+              <Link to="/affiliate-disclosure" className="dn-link">Affiliate disclosure</Link>
+            </nav>
+          </div>
         </div>
       </footer>
     </div>
