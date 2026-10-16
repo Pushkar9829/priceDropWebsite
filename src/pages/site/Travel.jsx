@@ -105,7 +105,7 @@ export default function Travel() {
   const data = useAsync(() => travelApi.get(), [], { initial: { partners: [], offers: [] } });
   const widgets = { flights: travel.flightsWidgetSrc, hotels: travel.hotelsWidgetSrc };
   const available = TABS.filter((t) => widgets[t.key]);
-  const [tab, setTab] = useState('flights');
+  const [tab, setTab] = useState(() => (new URLSearchParams(window.location.search).get('tab') === 'hotels' ? 'hotels' : 'flights'));
   const active = available.find((t) => t.key === tab) || available[0];
 
   return (

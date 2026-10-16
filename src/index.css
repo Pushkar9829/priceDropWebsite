@@ -520,6 +520,22 @@ html:has(.theme-dark) {
   scrollbar-width: thin;
   scrollbar-color: rgb(47 218 118 / 0.35) transparent;
 }
+/* Home hero: green light from the top-left corner. Many small steps (eased fall-off) avoid
+   banding, and it reaches full transparency well inside the box, so no edge is ever visible. */
+.hero-glow {
+  background: radial-gradient(
+    ellipse 110% 85% at 0% 0%,
+    rgb(47 218 118 / 0.2) 0%,
+    rgb(47 218 118 / 0.15) 8%,
+    rgb(47 218 118 / 0.105) 17%,
+    rgb(47 218 118 / 0.07) 27%,
+    rgb(47 218 118 / 0.042) 38%,
+    rgb(47 218 118 / 0.022) 50%,
+    rgb(47 218 118 / 0.009) 62%,
+    rgb(47 218 118 / 0.002) 72%,
+    rgb(47 218 118 / 0) 80%
+  );
+}
 /* Gradient helpers */
 .bg-gradient-primary {
   background: linear-gradient(135deg, #22bf63, #49df87);

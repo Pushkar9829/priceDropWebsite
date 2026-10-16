@@ -74,7 +74,7 @@ function SidebarContent({ onNavigate }) {
           </svg>
         </span>
         <span>
-          <span className="block text-sm font-bold text-white">PriceCompare</span>
+          <span className="block text-sm font-bold text-white">droppingnow</span>
           <span className="block text-[11px] text-slate-400">Admin console</span>
         </span>
       </Link>

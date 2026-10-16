@@ -1,15 +1,15 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BellRing, ChevronLeft, ChevronRight, Flame, Sparkle } from 'lucide-react';
+import { ArrowRight, BadgePercent, BedDouble, BellRing, ChevronRight, Flame, Gift, MapPin, Plane, Sparkle, Tag } from 'lucide-react';
 import SearchBox from '../../components/site/SearchBox';
 import ProductCard, { ProductCardSkeleton } from '../../components/site/ProductCard';
 import DealCard from '../../components/site/DealCard';
-import BrandCard from '../../components/site/BrandCard';
-import { Button, ErrorBanner, LiveDot, StoreLogo, cx, staggerStyle } from '../../components/ui';
-import PriceTicker from '../../components/site/PriceTicker';
+import BrandCard, { BrandLogo } from '../../components/site/BrandCard';
+import { Button, ErrorBanner, Skeleton, cx, staggerStyle } from '../../components/ui';
 import { brandApi, dealApi, productApi } from '../../lib/api';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useAuth } from '../../context/AuthContext';
+import { useSiteConfig } from '../../context/SiteConfigContext';
 import { CATEGORY_IMAGES, categoryMeta } from '../../lib/brands';
 
 function SectionTitle({ emoji, icon: Icon, title, count, to, linkLabel = 'See all' }) {
@@ -30,26 +30,48 @@ function SectionTitle({ emoji, icon: Icon, title, count, to, linkLabel = 'See al
   );
 }
 
-/** "What's on your mind?" — icon tiles that scroll sideways, with a green scroll indicator. */
-function CategoryRail({ categories }) {
+/** Green glyph for rail entries that have no 3D artwork yet (same footprint as the images). */
+function GlyphIcon({ icon: Icon }) {
+  return (
+    <span className="grid size-[68px] place-items-center">
+      <Icon className="size-12 text-[#2fda76] drop-shadow-[0_6px_14px_rgba(47,218,118,0.35)]" strokeWidth={1.6} />
+    </span>
+  );
+}
+
+/** "What's on your mind?" — the fixed shortcuts first, then catalogue categories. */
+function CategoryRail({ categories, travelOn }) {
   const rail = useRef(null);
+  const known = new Set(['electronics', 'fashion', 'beauty', 'home', 'food', 'sports', 'automotive', 'toys']);
   const items = [
     { label: 'All', to: '/search', image: CATEGORY_IMAGES.all, active: true },
-    { label: 'Price drops', to: '/deals', image: CATEGORY_IMAGES.drops },
-    ...categories.map((c) => ({
-      label: c.name.split(' ')[0],
-      to: `/search?category=${encodeURIComponent(c.name)}`,
-      image: categoryMeta(c.name).image,
+    { label: 'Deal of the Day', to: '/deals', image: CATEGORY_IMAGES.drops },
+    ...(travelOn
+      ? [
+          { label: 'Flights', to: '/travel', icon: Plane },
+          { label: 'Hotels', to: '/travel?tab=hotels', icon: BedDouble },
+        ]
+      : []),
+    { label: 'First Order', to: '/offers?q=first', icon: Gift },
+    { label: '80% Off', to: '/search?minDiscount=80&sort=discount', icon: BadgePercent },
+    ...['Electronics', 'Fashion', 'Beauty', 'Home', 'Food', 'Sports', 'Automotive', 'Toys'].map((name) => ({
+      label: name,
+      to: `/search?category=${encodeURIComponent(name)}`,
+      image: categoryMeta(name).image,
     })),
+    // Any other catalogue categories (General, Baby & Kids, Pets…) after the fixed set
+    ...categories
+      .filter((c) => !known.has(c.name.toLowerCase()))
+      .map((c) => ({ label: c.name.split(' ')[0], to: `/search?category=${encodeURIComponent(c.name)}`, image: categoryMeta(c.name).image })),
   ];
 
   return (
     <div className="relative">
       <div ref={rail} className="rail-green -mx-4 flex gap-4 overflow-x-auto px-4 pt-3 pb-3 sm:mx-0 sm:px-0">
-        {items.map(({ label, to, image, active }) => (
+        {items.map(({ label, to, image, icon, active }) => (
           <Link key={to} to={to} aria-current={active ? 'true' : undefined} className="flex w-fit min-w-[84px] shrink-0 flex-col items-center gap-2">
             <span className={cx('block transition-all duration-300', active ? 'scale-110' : 'opacity-85 hover:opacity-100')}>
-              <img src={image} alt="" width={192} height={192} decoding="async" className="size-[68px] object-contain" />
+              {image ? <img src={image} alt="" width={192} height={192} decoding="async" className="size-[68px] object-contain" /> : <GlyphIcon icon={icon} />}
             </span>
             <span
               className={cx(
@@ -76,16 +98,41 @@ function CategoryRail({ categories }) {
   );
 }
 
+/** "Top offers for you" tile: green top with the brand's best discount, dark footer with name. */
+function OfferBrandCard({ brand }) {
+  return (
+    <Link
+      to={`/brands/${encodeURIComponent(brand.name)}`}
+      className="group block w-[250px] shrink-0 snap-start overflow-hidden rounded-xl border border-white/5 bg-[#252627] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-20px_rgba(34,197,94,0.35)]"
+    >
+      <div className="relative h-[100px] bg-gradient-to-br from-[#1f8a4c] to-[#146b3a] px-4 pt-4">
+        <BrandLogo name={brand.name} size="sm" className="absolute top-4 right-4 transition-transform duration-300 group-hover:scale-105" />
+        <p className="mt-6 text-[11px] font-bold tracking-wider text-[#ffffff]/85 uppercase">Up to</p>
+        <p className="text-[22px] leading-tight font-extrabold text-[#ffffff]">{brand.maxDiscount}% OFF</p>
+      </div>
+      <div className="px-4 py-3">
+        <p className="truncate font-semibold text-slate-900">{brand.name}</p>
+        <p className="mt-0.5 text-xs text-slate-500">
+          {brand.dealCount} live deal{brand.dealCount === 1 ? '' : 's'}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function Rail({ children, className }) {
+  return <div className={cx('scrollbar-none -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0', className)}>{children}</div>;
+}
+
 export default function Home() {
   useDocumentTitle('');
   const { isAuthenticated } = useAuth();
-  const deals = useAsync(() => dealApi.list({ limit: 16 }), [], { initial: { items: [] } });
+  const { sections } = useSiteConfig();
+  const deals = useAsync(() => dealApi.list({ limit: 16 }), [], { initial: { items: [], total: 0 } });
   const fresh = useAsync(() => productApi.search({ limit: 8 }), [], { initial: { items: [], total: 0 } });
   const categories = useAsync(() => productApi.categories(), [], { initial: { items: [] } });
-  const stores = useAsync(() => productApi.stores(), [], { initial: { items: [] } });
+  const topBrands = useAsync(() => brandApi.top({ limit: 20 }), [], { initial: { items: [] } });
   const brandWalls = useAsync(() => brandApi.categories({ limit: 12 }), [], { initial: { sections: [], totalBrands: 0 } });
-  const tickerSrc = useAsync(() => productApi.search({ limit: 40 }), [], { initial: { items: [] } });
-  const dropsRail = useRef(null);
 
   // One card per product: a product dropping at two stores shouldn't fill two slots
   const dealItems = [];
@@ -98,117 +145,90 @@ export default function Home() {
     }
   }
 
-  // Ticker: real price drops first, then catalog items currently below MRP
-  const tickerItems = [
-    ...dealItems.map((d) => ({
-      id: d.productId?._id || d.productId?.id,
-      brand: d.productId?.brand,
-      discount: Math.round(d.discountPercent || 0),
-      price: d.currentPrice,
-    })),
-    ...(tickerSrc.data?.items || [])
-      .filter((p) => p.discountPercent > 0 && p.lowestPrice)
-      .map((p) => ({ id: p.id, brand: p.brand, discount: p.discountPercent, price: p.lowestPrice })),
-  ]
-    .filter((t) => t.id && t.discount > 0)
-    .slice(0, 20);
+  // Biggest discounts first. Brands with no live deal are left out, and so are "discounts" above
+  // 90% — those come from sellers listing an inflated MRP and would make the row look fake.
+  const offerBrands = [...(topBrands.data?.items || [])]
+    .filter((b) => b.maxDiscount > 0 && b.maxDiscount <= 90 && b.dealCount > 0)
+    .sort((a, b) => b.maxDiscount - a.maxDiscount)
+    .slice(0, 12);
 
-  const storeItems = stores.data?.items || [];
   const totalBrands = brandWalls.data?.totalBrands || 0;
   const statLine = [
-    fresh.data?.total ? `${fresh.data.total.toLocaleString('en-IN')}+ products` : null,
-    totalBrands >= 10 ? `${totalBrands}+ brands` : null,
-    storeItems.length ? `${storeItems.length} stores` : null,
+    totalBrands >= 10 ? `${totalBrands.toLocaleString('en-IN')}+ brands` : null,
+    deals.data?.total ? `${deals.data.total.toLocaleString('en-IN')} live price drops` : null,
   ]
     .filter(Boolean)
     .join(' · ');
 
   return (
-    <div>
-      <PriceTicker items={tickerItems} />
-
+    <div className="relative isolate">
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#2fda76]/[0.08] via-transparent to-[#2fda76]/5" />
-        <div className="dn-blobs" />
+      <section className="relative">
+        {/* Glow from the top-left corner that fades out over a much taller area than the hero,
+            behind the content (-z-10 inside this isolated wrapper), so it has no visible edge */}
+        <div className="hero-glow pointer-events-none absolute top-0 left-0 -z-10 h-[1100px] w-full" aria-hidden />
         <div className="relative container-page pt-10 pb-6 sm:pt-14">
-          <span className="dn-enter inline-flex items-center gap-2 rounded-full bg-[#163b26] px-3 py-1 text-xs font-semibold text-[#2fda76]">
-            <LiveDot className="size-2" /> Live price drops · India
+          <span className="dn-enter inline-flex items-center gap-1.5 rounded-full bg-[#1fae5b] px-3 py-1.5 text-xs font-semibold text-[#ffffff]">
+            <MapPin className="size-3.5" /> Deals near you · India
           </span>
-          <h1 className="dn-enter dn-d1 mt-5 max-w-4xl text-4xl leading-[1.08] font-bold tracking-tight sm:text-6xl">
-            <span className="block text-slate-900">Don&apos;t overpay again.</span>
-            <span className="text-gradient-primary block">Pay the lowest price, always.</span>
+          <h1 className="dn-enter dn-d1 mt-6 max-w-5xl text-4xl leading-[1.06] font-bold tracking-tight sm:text-6xl">
+            <span className="block text-slate-900">Craving a deal?</span>
+            <span className="block text-[#2fda76]">Grab it from your favourite brands.</span>
           </h1>
-          {statLine ? <p className="dn-enter dn-d15 mt-3 text-[15px] text-slate-500">{statLine}</p> : null}
-          <div className="dn-enter dn-d2 mt-7 max-w-xl">
-            <SearchBox size="lg" />
+          {statLine ? <p className="dn-enter dn-d15 mt-4 text-base text-slate-500 sm:text-lg">{statLine}</p> : null}
+          <div className="dn-enter dn-d2 mt-8 max-w-3xl">
+            <SearchBox size="lg" placeholder="Search for a brand, e.g. Nike, Apple, Zara…" />
           </div>
-          {storeItems.length ? (
-            <div className="dn-enter dn-d25 mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-500">
-              <span className="text-xs font-semibold tracking-wider uppercase">Comparing</span>
-              {storeItems.map((s) => (
-                <span key={s._id} className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-                  <StoreLogo store={s} size="sm" /> {s.name}
-                </span>
-              ))}
-            </div>
-          ) : null}
         </div>
       </section>
 
       {/* What's on your mind */}
-      <section className="container-page pt-8">
+      <section className="container-page pt-10">
         <SectionTitle title="What's on your mind?" to="/search" />
-        <CategoryRail categories={categories.data?.items || []} />
+        <CategoryRail categories={categories.data?.items || []} travelOn={sections.travel !== false} />
       </section>
 
-      {/* Price drops */}
-      <section className="container-page pt-12">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <h2 className="flex items-center gap-2.5 text-xl font-bold tracking-tight sm:text-2xl">
-            <Flame className="size-5 text-brand-500" /> Biggest price drops
-            {deals.data?.total ? <span className="dn-pill px-2 py-0.5 text-xs">{deals.data.total}</span> : null}
-          </h2>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => dropsRail.current?.scrollBy({ left: -300, behavior: 'smooth' })}
-              className="hidden size-8 place-items-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-transparent hover:bg-[#2fda76] hover:text-[#ffffff] sm:grid"
-              aria-label="Previous deals"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => dropsRail.current?.scrollBy({ left: 300, behavior: 'smooth' })}
-              className="hidden size-8 place-items-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-transparent hover:bg-[#2fda76] hover:text-[#ffffff] sm:grid"
-              aria-label="More deals"
-            >
-              <ChevronRight className="size-4" />
-            </button>
-            <Link to="/deals" className="ml-1 text-sm font-medium text-slate-600 hover:text-slate-900">
-              See all
-            </Link>
-          </div>
-        </div>
+      {/* Top offers for you */}
+      <section className="container-page pt-10">
+        <SectionTitle icon={Flame} title="Top offers for you" />
+        {topBrands.loading ? (
+          <Rail>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-[165px] w-[250px] shrink-0 rounded-xl" />
+            ))}
+          </Rail>
+        ) : offerBrands.length ? (
+          <Rail>
+            {offerBrands.map((b, i) => (
+              <div key={b.slug || b.name} className="dn-stagger shrink-0" style={staggerStyle(i)}>
+                <OfferBrandCard brand={b} />
+              </div>
+            ))}
+          </Rail>
+        ) : null}
+      </section>
+
+      {/* Latest best drops */}
+      <section className="container-page pt-10">
+        <SectionTitle icon={Tag} title="Latest best drops" to="/deals" />
         {deals.error ? (
           <ErrorBanner error={{ message: 'Couldn’t load price drops right now.' }} onRetry={deals.reload} />
         ) : deals.loading ? (
-          <div className="flex gap-4 overflow-hidden">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="w-56 shrink-0">
+          <Rail>
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="w-44 shrink-0">
                 <ProductCardSkeleton />
               </div>
             ))}
-          </div>
+          </Rail>
         ) : dealItems.length ? (
-          <div ref={dropsRail} className="scrollbar-none -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+          <Rail>
             {dealItems.map((d, i) => (
-              <div key={d._id} className="dn-stagger w-56 shrink-0 snap-start" style={staggerStyle(i)}>
+              <div key={d._id} className="dn-stagger w-44 shrink-0 snap-start sm:w-48" style={staggerStyle(i)}>
                 <DealCard deal={d} />
               </div>
             ))}
-          </div>
+          </Rail>
         ) : (
           <p className="rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center text-sm text-slate-500">
             No drops detected yet — prices are re-checked around the clock.
@@ -225,10 +245,10 @@ export default function Home() {
             count={section.count}
             to={`/search?category=${encodeURIComponent(section.category)}`}
           />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
             {section.brands.map((b, i) => (
               <div key={b.slug || b.name} className="dn-stagger" style={staggerStyle(i)}>
-                <BrandCard brand={b} />
+                <BrandCard brand={b} featured={i < 3 && b.dealCount > 0} />
               </div>
             ))}
           </div>

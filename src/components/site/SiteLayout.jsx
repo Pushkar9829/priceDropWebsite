@@ -6,14 +6,12 @@ import {
   ChevronDown,
   Heart,
   LayoutDashboard,
-  Laptop,
   Plane,
+  Smartphone,
+  UtensilsCrossed,
   LogOut,
   Menu,
-  Shirt,
-  Sofa,
   Sparkle,
-  Tag,
   Ticket,
   User,
   X,
@@ -26,28 +24,38 @@ import SearchBox from './SearchBox';
 
 export function Logo({ className }) {
   return (
-    <Link to="/" className={cx('inline-flex items-center gap-2 text-lg font-bold tracking-tight', className)} aria-label="PriceCompare home">
+    <Link to="/" className={cx('inline-flex items-center gap-2 text-lg font-bold tracking-tight', className)} aria-label="droppingnow home">
       <span className="grid size-8 place-items-center rounded-full bg-[#2fda76] text-[#0f1a14]">
         <svg viewBox="0 0 32 32" className="size-4.5" aria-hidden>
           <path d="M6 11l7 7 4-4 9 9" stroke="currentColor" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
       <span className="text-slate-900">
-        price<span className="text-[#2fda76]">compare</span>
+        dropping<span className="text-[#2fda76]">now</span>
       </span>
     </Link>
   );
 }
 
-/** Centre pills — "All" plus the main shopping verticals (category filters on search). */
+/** Centre pills — "All" plus the main verticals. Food and Recreation are partner-store offers. */
 const NAV = [
   { to: '/search', label: 'All', icon: Sparkle, match: (l) => l.pathname === '/search' && !l.search.includes('category=') },
-  { to: '/deals', label: 'Deals', icon: Tag, match: (l) => l.pathname === '/deals' },
-  { to: '/offers', label: 'Coupons', icon: Ticket, section: 'offers', match: (l) => l.pathname === '/offers' || l.pathname.startsWith('/stores') },
+  {
+    to: `/offers?category=${encodeURIComponent('Food & Grocery')}`,
+    label: 'Food',
+    icon: UtensilsCrossed,
+    section: 'offers',
+    match: (l) => l.pathname === '/offers' && l.search.includes('Food'),
+  },
   { to: '/travel', label: 'Travel', icon: Plane, section: 'travel', match: (l) => l.pathname === '/travel' },
-  { to: '/search?category=Electronics', label: 'Tech', icon: Laptop, match: (l) => l.search.includes('category=Electronics') },
-  { to: '/search?category=Fashion', label: 'Fashion', icon: Shirt, match: (l) => l.search.includes('category=Fashion') },
-  { to: '/search?category=Home', label: 'Home', icon: Sofa, match: (l) => l.search.includes('category=Home') },
+  {
+    to: '/offers?category=Entertainment',
+    label: 'Recreation',
+    icon: Ticket,
+    section: 'offers',
+    match: (l) => l.pathname === '/offers' && l.search.includes('Entertainment'),
+  },
+  { to: '/search?category=Electronics', label: 'Tech', icon: Smartphone, match: (l) => l.search.includes('category=Electronics') },
 ];
 const USER_NAV = [
   { to: '/watchlist', label: 'Watchlist', icon: Heart },
@@ -183,11 +191,9 @@ export default function SiteLayout() {
           </nav>
 
           <div className="ml-auto flex items-center gap-1 md:ml-0">
-            {!isHome ? (
-              <div className="hidden w-64 lg:block">
-                <SearchBox />
-              </div>
-            ) : null}
+            <div className="hidden w-64 xl:block 2xl:w-80">
+              <SearchBox />
+            </div>
             {isAuthenticated ? (
               <>
                 <Link to="/notifications" className={iconBtn} aria-label={`Notifications${unread ? ` (${unread} unread)` : ''}`}>
@@ -226,11 +232,9 @@ export default function SiteLayout() {
             </button>
           </div>
         </div>
-        {!isHome ? (
-          <div className="container-page pb-3 lg:hidden">
-            <SearchBox />
-          </div>
-        ) : null}
+        <div className="container-page pb-3 xl:hidden">
+          <SearchBox />
+        </div>
         {mobileOpen ? (
           <div className="border-t border-white/5 md:hidden">
             <nav className="container-page flex flex-col gap-1 py-3" aria-label="Mobile">

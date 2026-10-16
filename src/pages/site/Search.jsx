@@ -11,7 +11,10 @@ const SORTS = [
   ['price_asc', 'Price: low to high'],
   ['price_desc', 'Price: high to low'],
   ['newest', 'Newest'],
+  ['discount', 'Biggest discount'],
 ];
+// "At least X% off" chips; the API accepts any whole number 1–95
+const DISCOUNTS = [10, 25, 40, 50, 60, 70];
 
 export default function Search() {
   const [params, setParams] = useSearchParams();
@@ -25,14 +28,16 @@ export default function Search() {
   const cleanPrice = (v) => (Number(v) > 0 ? String(Math.round(Number(v))) : '');
   const minPrice = cleanPrice(params.get('minPrice'));
   const maxPrice = cleanPrice(params.get('maxPrice'));
+  const rawOff = parseInt(params.get('minDiscount'), 10);
+  const minDiscount = rawOff >= 1 && rawOff <= 95 ? String(rawOff) : '';
   const [priceDraft, setPriceDraft] = useState({ min: minPrice, max: maxPrice });
   useEffect(() => setPriceDraft({ min: minPrice, max: maxPrice }), [minPrice, maxPrice]);
 
   useDocumentTitle(q ? `“${q}”` : brand || category || 'Browse');
 
   const results = useAsync(
-    () => productApi.search({ q, category, brand, sort, page, limit: 24, minPrice, maxPrice }),
-    [q, category, brand, sort, page, minPrice, maxPrice],
+    () => productApi.search({ q, category, brand, sort, page, limit: 24, minPrice, maxPrice, minDiscount }),
+    [q, category, brand, sort, page, minPrice, maxPrice, minDiscount],
     {
       initial: { items: [], total: 0, page: 1, pages: 1 },
     }
@@ -59,6 +64,7 @@ export default function Search() {
       ['minPrice', 'maxPrice'],
       minPrice && maxPrice ? `${fmt(minPrice)} – ${fmt(maxPrice)}` : minPrice ? `Over ${fmt(minPrice)}` : `Under ${fmt(maxPrice)}`,
     ],
+    minDiscount && [['minDiscount'], `${minDiscount}% off or more`],
   ].filter(Boolean);
   const applyPrice = (e) => {
     e.preventDefault();
@@ -148,6 +154,26 @@ export default function Search() {
               </Button>
             </div>
           </form>
+
+          <div className="mt-6">
+            <p className="mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">Discount</p>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Minimum discount">
+              <button type="button" onClick={() => update({ minDiscount: '' })} className={cx('dn-chip', !minDiscount && 'active')}>
+                Any
+              </button>
+              {DISCOUNTS.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  aria-pressed={minDiscount === String(d)}
+                  onClick={() => update({ minDiscount: minDiscount === String(d) ? '' : String(d) })}
+                  className={cx('dn-chip', minDiscount === String(d) && 'active')}
+                >
+                  {d}%+ off
+                </button>
+              ))}
+            </div>
+          </div>
         </aside>
 
         <div className="min-w-0">

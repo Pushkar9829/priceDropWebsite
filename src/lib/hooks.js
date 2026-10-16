@@ -44,6 +44,6 @@ export function useDebounced(value, delay = 350) {
 
 export function useDocumentTitle(title) {
   useEffect(() => {
-    document.title = title ? `${title} · PriceCompare` : 'PriceCompare — find the lowest price';
+    document.title = title ? `${title} · droppingnow` : 'droppingnow — live price drops, deals & offers';
   }, [title]);
 }
