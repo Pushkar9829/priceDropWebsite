@@ -144,6 +144,7 @@ export const siteApi = {
 
 export const travelApi = {
   get: () => get('/travel'),
+  flights: (origin) => get(`/travel/flights${toQuery({ origin })}`),
 };
 
 export const brandApi = {

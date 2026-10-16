@@ -11,7 +11,7 @@ const DEFAULT = {
   loaded: false,
   sections: { offers: true, stores: true, travel: true },
   cuelinksCid: '',
-  travel: { marker: '', flightsWidgetSrc: '', hotelsWidgetSrc: '' },
+  travel: { marker: '', flightsWidgetSrc: '', hotelsWidgetSrc: '', originCities: [], fares: false },
 };
 
 const SiteConfigContext = createContext(DEFAULT);

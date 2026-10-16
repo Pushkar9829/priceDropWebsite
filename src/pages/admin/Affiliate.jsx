@@ -17,6 +17,7 @@ export function AffiliateSettings() {
   const settings = useAsync(() => adminApi.affiliateSettings(), [], { initial: null });
   const [form, setForm] = useState(null);
   const [apiKey, setApiKey] = useState('');
+  const [tpToken, setTpToken] = useState('');
   const [saving, setSaving] = useState(false);
   const [jobId, setJobId] = useState(null);
 
@@ -30,6 +31,7 @@ export function AffiliateSettings() {
       marker: s.travelpayouts.marker || '',
       flightsWidgetSrc: s.travelpayouts.flightsWidgetSrc || '',
       hotelsWidgetSrc: s.travelpayouts.hotelsWidgetSrc || '',
+      originCities: (s.travelpayouts.originCities || []).join(', '),
       hiddenCategories: (s.hiddenCategories || []).join(', '),
       hiddenDomains: (s.hiddenDomains || []).join(', '),
     });
@@ -51,12 +53,19 @@ export function AffiliateSettings() {
       const saved = await adminApi.updateAffiliateSettings({
         sections: form.sections,
         cuelinks: { cid: form.cid, syncEnabled: form.syncEnabled, ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}) },
-        travelpayouts: { marker: form.marker, flightsWidgetSrc: form.flightsWidgetSrc, hotelsWidgetSrc: form.hotelsWidgetSrc },
+        travelpayouts: {
+          marker: form.marker,
+          flightsWidgetSrc: form.flightsWidgetSrc,
+          hotelsWidgetSrc: form.hotelsWidgetSrc,
+          originCities: form.originCities,
+          ...(tpToken.trim() ? { apiToken: tpToken.trim() } : {}),
+        },
         hiddenCategories: form.hiddenCategories,
         hiddenDomains: form.hiddenDomains,
       });
       settings.setData(saved);
       setApiKey('');
+      setTpToken('');
       toast.success('Settings saved — the website picks them up within a minute');
     } catch (err) {
       toast.error(err.message);
@@ -175,7 +184,24 @@ export function AffiliateSettings() {
                 scripts are accepted.
               </p>
             </div>
-            <Input label="Marker (partner ID)" value={form.marker} onChange={(e) => set('marker', e.target.value)} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input label="Marker (partner ID)" value={form.marker} onChange={(e) => set('marker', e.target.value)} hint="Added to every flight booking link so bookings are credited to you" />
+              <Input
+                label="API token (cheap-fare cards)"
+                type="password"
+                autoComplete="off"
+                value={tpToken}
+                onChange={(e) => setTpToken(e.target.value)}
+                placeholder={s?.travelpayouts?.hasApiToken ? `Saved ${s.travelpayouts.apiTokenHint} — type to replace` : 'Travelpayouts → Profile → API token'}
+                hint={s?.travelpayouts?.apiTokenSource === 'server' ? 'Using the token from the server environment' : 'Stored securely; never shown again'}
+              />
+            </div>
+            <Input
+              label="Departure cities for “Cheap flights from…”"
+              value={form.originCities}
+              onChange={(e) => set('originCities', e.target.value)}
+              hint="3-letter codes, comma-separated, e.g. DEL, BOM, BLR, HYD, MAA, CCU"
+            />
             <label className="block">
               <span className="label">Flights search widget</span>
               <textarea className="input h-20 py-2 font-mono text-xs" value={form.flightsWidgetSrc} onChange={(e) => set('flightsWidgetSrc', e.target.value)} placeholder='<script async src="https://tp.media/content?…" charset="utf-8"></script>' />

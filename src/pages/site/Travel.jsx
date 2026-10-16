@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BedDouble, Plane } from 'lucide-react';
+import { ArrowRight, BedDouble, Plane } from 'lucide-react';
 import OfferCard, { StoreMark } from '../../components/site/OfferCard';
 import { EmptyState, ErrorBanner, Skeleton, cx, staggerStyle } from '../../components/ui';
 import { travelApi } from '../../lib/api';
+import { formatInr } from '../../lib/format';
 import { useAsync, useDocumentTitle } from '../../lib/hooks';
 import { useSiteConfig } from '../../context/SiteConfigContext';
 
@@ -27,6 +28,70 @@ function TravelWidget({ src }) {
     };
   }, [src]);
   return <div ref={box} className="min-h-24 [&_iframe]:max-w-full" />;
+}
+
+const fareDate = (iso) => (iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '');
+
+/** "Cheap flights from …": cheapest one-way fares per destination (Travelpayouts Data API). */
+function CheapFlights({ cities }) {
+  const [origin, setOrigin] = useState(cities[0]);
+  const fares = useAsync(() => travelApi.flights(origin), [origin], { initial: { fares: [], originName: origin } });
+  if (!cities.length) return null;
+  return (
+    <section className="mt-10">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-bold">Cheap flights from {fares.data.originName || origin}</h2>
+        <div className="rail-green -mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          {cities.map((c) => (
+            <button key={c} type="button" onClick={() => setOrigin(c)} className={cx('dn-chip', origin === c && 'active')}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+      {fares.loading ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+      ) : fares.error ? (
+        <p className="text-sm text-slate-500">Flight prices are unavailable right now — try the search above.</p>
+      ) : fares.data.fares.length ? (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {fares.data.fares.map((f, i) => (
+              <a
+                key={f.to}
+                href={f.url}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                className="group dn-card dn-stagger flex-row items-center gap-3 p-4"
+                style={staggerStyle(i)}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-center gap-1.5 truncate font-semibold text-slate-900">
+                    {fares.data.originName} <ArrowRight className="size-3.5 shrink-0 text-slate-500" /> {f.toName}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {fareDate(f.departureAt)} · {f.transfers ? `${f.transfers} stop${f.transfers > 1 ? 's' : ''}` : 'Non-stop'}
+                    {f.airline ? ` · ${f.airline}` : ''}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-[11px] text-slate-500">from</p>
+                  <p className="text-lg font-bold text-brand-600 group-hover:underline">{formatInr(f.price)}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-slate-500">One-way fares found recently; the live price shows when you open the search.</p>
+        </>
+      ) : (
+        <p className="text-sm text-slate-500">No recent fares from this city.</p>
+      )}
+    </section>
+  );
 }
 
 const TABS = [
@@ -69,6 +134,8 @@ export default function Travel() {
           </div>
         ) : null}
       </div>
+
+      {travel.fares && travel.originCities?.length ? <CheapFlights cities={travel.originCities} /> : null}
 
       <ErrorBanner error={data.error} onRetry={data.reload} />
 
