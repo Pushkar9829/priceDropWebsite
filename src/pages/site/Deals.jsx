@@ -27,14 +27,14 @@ export default function Deals() {
       <div className="mt-8">
         <ErrorBanner error={deals.error} onRetry={deals.reload} />
         {deals.loading ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : deals.data.items.length ? (
           <>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
               {deals.data.items.map((d, i) => (
                 <div key={d._id} className="dn-stagger" style={staggerStyle(i)}>
                   <DealCard deal={d} />

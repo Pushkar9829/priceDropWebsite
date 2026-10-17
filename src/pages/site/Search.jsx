@@ -195,14 +195,14 @@ export default function Search() {
           <ErrorBanner error={results.error} onRetry={results.reload} />
 
           {results.loading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))}
             </div>
           ) : items.length ? (
             <>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
                 {items.map((p, i) => (
                   <div key={p.id} className="dn-stagger" style={staggerStyle(i)}>
                     <ProductCard product={p} />

@@ -75,14 +75,14 @@ export default function Brand() {
       <div className="mt-8">
         <ErrorBanner error={list.error} onRetry={list.reload} />
         {list.loading ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : items.length ? (
           <>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
               {items.map((p, i) => (
                 <div key={p.id} className="dn-stagger" style={staggerStyle(i)}>
                   <ProductCard product={p} />

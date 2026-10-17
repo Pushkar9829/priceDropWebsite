@@ -21,15 +21,12 @@ import { useSiteConfig } from '../../context/SiteConfigContext';
 import { INBOX_EVENT, notificationApi } from '../../lib/api';
 import { Button, cx } from '../ui';
 import SearchBox from './SearchBox';
+import BrandMark from './BrandMark';
 
 export function Logo({ className }) {
   return (
     <Link to="/" className={cx('inline-flex items-center gap-2 text-lg font-bold tracking-tight', className)} aria-label="droppingnow home">
-      <span className="grid size-8 place-items-center rounded-full bg-[#2fda76] text-[#0f1a14]">
-        <svg viewBox="0 0 32 32" className="size-4.5" aria-hidden>
-          <path d="M6 11l7 7 4-4 9 9" stroke="currentColor" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
+      <BrandMark className="size-8" iconClassName="size-4" />
       <span className="text-slate-900">
         dropping<span className="text-[#2fda76]">now</span>
       </span>
@@ -141,6 +138,28 @@ export default function SiteLayout() {
 
   useEffect(() => setMobileOpen(false), [location.pathname, location.search]);
 
+  // Header slides away while scrolling down and comes back as soon as you scroll up
+  const [headerHidden, setHeaderHidden] = useState(false);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (y < 80) setHeaderHidden(false);
+        else if (y > lastY + 6) setHeaderHidden(true);
+        else if (y < lastY - 6) setHeaderHidden(false);
+        if (Math.abs(y - lastY) > 6 || y < 80) lastY = y;
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  useEffect(() => setHeaderHidden(false), [location.pathname]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       setUnread(0);
@@ -170,7 +189,12 @@ export default function SiteLayout() {
 
   return (
     <div className="theme-dark flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-white/5 bg-[#181a1b]/85 backdrop-blur-xl">
+      <header
+        className={cx(
+          'sticky top-0 z-40 border-b border-white/5 bg-[#181a1b]/85 backdrop-blur-xl transition-transform duration-300 ease-out',
+          headerHidden && !mobileOpen && '-translate-y-full'
+        )}
+      >
         <div className="container-page flex h-16 items-center gap-3">
           <Logo />
 

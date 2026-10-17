@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import BrandMark from '../site/BrandMark';
 import {
   Activity,
   Bell,
@@ -68,11 +69,7 @@ function SidebarContent({ onNavigate }) {
   return (
     <div className="flex h-full flex-col">
       <Link to="/admin" className="flex items-center gap-2.5 px-5 py-5" onClick={onNavigate}>
-        <span className="grid size-8 place-items-center rounded-xl bg-brand-500 text-white">
-          <svg viewBox="0 0 32 32" className="size-5" aria-hidden>
-            <path d="M6 21l6-6 4 4 9-9" stroke="currentColor" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
+        <BrandMark className="size-8" iconClassName="size-4" />
         <span>
           <span className="block text-sm font-bold text-white">droppingnow</span>
           <span className="block text-[11px] text-slate-400">Admin console</span>

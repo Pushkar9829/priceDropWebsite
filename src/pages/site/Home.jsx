@@ -129,7 +129,7 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
   const { sections } = useSiteConfig();
   const deals = useAsync(() => dealApi.list({ limit: 16 }), [], { initial: { items: [], total: 0 } });
-  const fresh = useAsync(() => productApi.search({ limit: 8 }), [], { initial: { items: [], total: 0 } });
+  const fresh = useAsync(() => productApi.search({ limit: 12 }), [], { initial: { items: [], total: 0 } });
   const categories = useAsync(() => productApi.categories(), [], { initial: { items: [] } });
   const topBrands = useAsync(() => brandApi.top({ limit: 20 }), [], { initial: { items: [] } });
   const brandWalls = useAsync(() => brandApi.categories({ limit: 12 }), [], { initial: { sections: [], totalBrands: 0 } });
@@ -245,7 +245,7 @@ export default function Home() {
             count={section.count}
             to={`/search?category=${encodeURIComponent(section.category)}`}
           />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
             {section.brands.map((b, i) => (
               <div key={b.slug || b.name} className="dn-stagger" style={staggerStyle(i)}>
                 <BrandCard brand={b} featured={i < 3 && b.dealCount > 0} />
@@ -260,11 +260,11 @@ export default function Home() {
         <SectionTitle icon={Sparkle} title="Fresh prices" to="/search" />
         {fresh.error ? <ErrorBanner error={{ message: 'Couldn’t load products right now.' }} onRetry={fresh.reload} /> : null}
         {fresh.loading ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+            {Array.from({ length: 12 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         ) : fresh.data.items.length ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
             {fresh.data.items.map((p, i) => (
               <div key={p.id} className="dn-stagger" style={staggerStyle(i)}>
                 <ProductCard product={p} />
